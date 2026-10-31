@@ -1,0 +1,31 @@
+# .NET build and test output
+**/bin/
+**/obj/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+artifacts/
+
+# IDE and editor user settings
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vscode/*.code-workspace
+.vscode/settings.json
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+secrets.json
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
