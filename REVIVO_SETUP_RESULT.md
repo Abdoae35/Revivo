@@ -6,7 +6,7 @@ Status: architecture and configuration code added; package restore, complete bui
 
 ```text
 Revivo.slnx
-Revivo/                          existing API folder
+Revivo.Api/                      API folder (renamed after setup)
   Revivo.Api.csproj              renamed existing project
   Program.cs
   Revivo.http
@@ -61,7 +61,7 @@ The project files declare `Microsoft.EntityFrameworkCore.SqlServer` **10.0.5** i
    python3 - <<'PY'
    import getpass, json, subprocess
    value = getpass.getpass('Connection string: ')
-   subprocess.run(['dotnet', 'user-secrets', 'set', '--project', 'Revivo/Revivo.Api.csproj'],
+   subprocess.run(['dotnet', 'user-secrets', 'set', '--project', 'Revivo.Api/Revivo.Api.csproj'],
                   input=json.dumps({'ConnectionStrings:RevivoDb': value}), text=True, check=True)
    PY
    ```
