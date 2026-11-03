@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="../Revivo.Application/Revivo.Application.csproj" />
     <ProjectReference Include="../Revivo.Infrastructure/Revivo.Infrastructure.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
       <PrivateAssets>all</PrivateAssets>

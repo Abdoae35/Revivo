@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Revivo.Api.Tests/Revivo.Api.Tests.csproj" />
   <Project Path="Revivo.Api/Revivo.Api.csproj" />
   <Project Path="Revivo.Application/Revivo.Application.csproj" />
   <Project Path="Revivo.Domain/Revivo.Domain.csproj" />

@@ -198,8 +198,217 @@
             "description": "Creates a unique fixture and then submits the same registration again."
           },
           "response": []
+        },
+        {
+          "name": "Login Success (200)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const email = `revivo-login-${pm.variables.replaceIn('{{$guid}}')}@example.com`;",
+                  "const password = pm.environment.get('testPassword') || `Revivo-${pm.variables.replaceIn('{{$guid}}')}-aA1!`;",
+                  "pm.variables.set('loginBody', JSON.stringify({ email, password }));",
+                  "pm.sendRequest({ url: pm.variables.replaceIn('{{baseUrl}}/api/auth/register'), method: 'POST', header: { 'Content-Type': 'application/json' }, body: { mode: 'raw', raw: JSON.stringify({ name: 'Login Test User', email, password }) } }, (error, response) => {",
+                  "    pm.test('Login fixture was registered', () => { pm.expect(error).to.equal(null); pm.expect(response.code).to.equal(201); });",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login returns 200 and an access token', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.accessToken).to.be.a('string').and.not.empty;",
+                  "    pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "    pm.environment.set('accessToken', body.accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{loginBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Registers a unique test user before logging in; saves the runtime token."
+          },
+          "response": []
+        },
+        {
+          "name": "Login Invalid Credentials (401)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const email = `missing-${pm.variables.replaceIn('{{$guid}}')}@example.com`;",
+                  "pm.variables.set('loginBody', JSON.stringify({ email, password: 'invalid-test-password' }));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid credentials return 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{loginBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Uses a generated email that has not been registered."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Only user profile fields are returned', () => {",
+                  "    const user = pm.response.json();",
+                  "    pm.expect(user.id).to.be.a('string');",
+                  "    pm.expect(user.name).to.be.a('string');",
+                  "    pm.expect(user.email).to.be.a('string');",
+                  "    pm.expect(user).not.to.have.property('passwordHash');",
+                  "    pm.expect(user).not.to.have.property('password');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Run Login Success first to save an access token."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User Without Token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Missing token returns 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Checks the endpoint without an authorization header."
+          },
+          "response": []
         }
       ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": ""
     }
   ]
 }

@@ -24,6 +24,7 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<RevivoDbContext>();
 
         services.AddScoped<IRegistrationService, RegistrationService>();
+        services.AddScoped<ILoginService, LoginService>();
 
         return services;
     }
