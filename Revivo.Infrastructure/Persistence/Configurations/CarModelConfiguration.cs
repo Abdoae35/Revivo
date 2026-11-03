@@ -10,7 +10,8 @@ public sealed class CarModelConfiguration : IEntityTypeConfiguration<CarModel>
     {
         builder.Property(model => model.Name).HasMaxLength(100).IsRequired();
         builder.HasIndex(model => new { model.CarMakeId, model.Name }).IsUnique();
-        builder.HasOne<CarMake>().WithMany().HasForeignKey(model => model.CarMakeId)
+        builder.HasOne(model => model.CarMake).WithMany(make => make.Models)
+            .HasForeignKey(model => model.CarMakeId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

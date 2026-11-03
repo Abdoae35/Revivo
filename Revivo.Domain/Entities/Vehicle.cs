@@ -8,6 +8,7 @@ public sealed class Vehicle
     public int Id { get; set; }
     public Guid OwnerId { get; set; }
     public int CarModelId { get; set; }
+    public CarModel CarModel { get; set; } = null!;
 
     public required int Year
     {

@@ -17,7 +17,8 @@ public sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.Property(vehicle => vehicle.ImageUrl).HasMaxLength(2048);
         builder.HasIndex(vehicle => vehicle.OwnerId);
         builder.HasIndex(vehicle => vehicle.CarModelId);
-        builder.HasOne<CarModel>().WithMany().HasForeignKey(vehicle => vehicle.CarModelId)
+        builder.HasOne(vehicle => vehicle.CarModel).WithMany(model => model.Vehicles)
+            .HasForeignKey(vehicle => vehicle.CarModelId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
