@@ -709,7 +709,7 @@
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "const models = pm.response.json();",
                   "pm.test('Models are DTOs', () => pm.expect(models).to.be.an('array'));",
-                  "if (models.length) pm.collectionVariables.set('carModelId', String(models[0].id));",
+                  "if (models.length) { const model = models[0]; pm.collectionVariables.set('carModelId', String(model.id)); const year = Math.min(model.yearEnd || new Date().getFullYear(), new Date().getFullYear() + 1); pm.collectionVariables.set('carImageYear', String(Math.max(model.yearStart || year, year))); }",
                   "pm.test('Model year bounds are present', () => models.forEach(model => { pm.expect(model).to.have.property('yearStart'); pm.expect(model).to.have.property('yearEnd'); }));"
                 ]
               }
@@ -889,7 +889,7 @@
                 "{{vehicleId}}"
               ]
             },
-            "description": "Set otherAccessToken to a second user\u2019s token and vehicleId to a vehicle owned by the first user.",
+            "description": "Set otherAccessToken to a second user’s token and vehicleId to a vehicle owned by the first user.",
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -1009,6 +1009,141 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Car Images",
+      "item": [
+        {
+          "name": "Get Car Image",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const image = pm.response.json();",
+                  "pm.test('Image response is explicit', () => { pm.expect(['found','noImage','unavailable','rateLimited','notConfigured']).to.include(image.status); pm.expect(image.isExactVehicle).to.equal(false); pm.expect(image.message).to.be.a('string'); });",
+                  "pm.test('Found photos include hotlinked URL and attribution', () => { if (image.status === 'found') { pm.expect(image.imageUrl).to.match(/^https:\\/\\/images\\.unsplash\\.com\\//); pm.expect(image.photographerName).to.be.a('string').and.not.empty; pm.expect(image.photographerUrl).to.include('utm_source=revivo'); pm.expect(image.photoUrl).to.include('utm_source=revivo'); pm.expect(image.unsplashUrl).to.include('utm_source=revivo'); } else { pm.expect(image.imageUrl).to.equal(null); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/car-catalog/car-image?modelId={{carModelId}}&year={{carImageYear}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "car-catalog",
+                "car-image"
+              ]
+            },
+            "description": "Run Get Car Models first to save carModelId. Set carImageYear within the selected model range. A photo is illustrative, not a verified image of the exact vehicle."
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Model",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Unknown model returns 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/car-catalog/car-image?modelId=99999999&year=2024",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "car-catalog",
+                "car-image"
+              ]
+            },
+            "description": "Uses an unlikely model ID. Change it if that ID exists in your database."
+          },
+          "response": []
+        },
+        {
+          "name": "No Image Found / Fallback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const image = pm.response.json();",
+                  "pm.test('Fallback or photo has clear status', () => { pm.expect(['found','noImage','unavailable','rateLimited','notConfigured']).to.include(image.status); pm.expect(image.message).to.be.a('string').and.not.empty; if (image.status !== 'found') { pm.expect(image.imageUrl).to.equal(null); pm.expect(image.photographerName).to.equal(null); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/car-catalog/car-image?modelId={{carModelId}}&year={{carImageYear}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "car-catalog",
+                "car-image"
+              ]
+            },
+            "description": "To exercise noImage, use a valid model and year with no suitable Unsplash result. If Unsplash finds a photo, this request validates its found response instead."
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Year",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid year returns 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Year validation detail is returned', () => pm.expect(pm.response.json().errors).to.have.property('year'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/car-catalog/car-image?modelId={{carModelId}}&year=1800",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "car-catalog",
+                "car-image"
+              ]
+            },
+            "description": "Year 1800 is outside the valid vehicle range."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1031,6 +1166,10 @@
     {
       "key": "makeId",
       "value": ""
+    },
+    {
+      "key": "carImageYear",
+      "value": "2024"
     }
   ]
 }

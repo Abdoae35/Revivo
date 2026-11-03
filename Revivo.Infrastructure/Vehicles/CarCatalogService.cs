@@ -40,4 +40,9 @@ public sealed class CarCatalogService(RevivoDbContext db) : ICarCatalogService
         var end = Math.Min(bounds.YearEnd ?? DateTime.UtcNow.Year + 1, DateTime.UtcNow.Year + 1);
         return end < start ? [] : Enumerable.Range(start, end - start + 1).Reverse().ToArray();
     }
+
+    public Task<CarImageModelDto?> GetModelForImageAsync(int modelId, CancellationToken cancellationToken) =>
+        db.CarModels.AsNoTracking().Where(model => model.Id == modelId)
+            .Select(model => new CarImageModelDto(model.CarMake.Name, model.Name, model.YearStart, model.YearEnd))
+            .SingleOrDefaultAsync(cancellationToken);
 }

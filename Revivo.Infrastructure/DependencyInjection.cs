@@ -8,6 +8,7 @@ using Revivo.Application.Authentication;
 using Revivo.Application.Vehicles;
 using Revivo.Infrastructure.Vehicles;
 using Revivo.Infrastructure.Catalog;
+using Revivo.Infrastructure.Images;
 
 namespace Revivo.Infrastructure;
 
@@ -32,6 +33,13 @@ public static class DependencyInjection
         services.AddScoped<ICarCatalogService, CarCatalogService>();
         services.AddScoped<IVehicleService, VehicleService>();
         services.AddScoped<CarCatalogSeeder>();
+        services.AddMemoryCache();
+        services.AddHttpClient("Unsplash", client =>
+        {
+            client.BaseAddress = new Uri("https://api.unsplash.com/");
+            client.Timeout = TimeSpan.FromSeconds(5);
+        });
+        services.AddScoped<ICarImageService, UnsplashCarImageService>();
 
         return services;
     }
