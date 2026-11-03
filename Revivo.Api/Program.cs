@@ -1,4 +1,5 @@
 using Revivo.Infrastructure;
+using Revivo.Api.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,5 +14,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapRegistrationEndpoints();
 
 app.Run();

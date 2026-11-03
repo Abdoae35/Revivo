@@ -1,0 +1,205 @@
+{
+  "info": {
+    "name": "Revivo",
+    "description": "Project-wide Revivo API collection. Configure the local environment and run the HTTPS launch profile. Trust the local development certificate in Postman. Registration requests create persistent test accounts; duplicate registration creates a separate fixture. testPassword is optional and is never stored in this collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User (201)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const email = `revivo-${pm.variables.replaceIn('{{$guid}}')}@example.com`;",
+                  "const password = pm.environment.get('testPassword') || `Revivo-${pm.variables.replaceIn('{{$guid}}')}-aA1!`;",
+                  "pm.variables.set('registrationEmail', email);",
+                  "pm.variables.set('registrationPassword', password);",
+                  "pm.environment.set('testEmail', email);",
+                  "pm.variables.set('registrationBody', JSON.stringify({ name: 'Revivo Test User', email, password }));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Response contains a user ID and no password', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.be.an('object');",
+                  "    pm.expect(body.id).to.be.a('string').and.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);",
+                  "    pm.expect(body).not.to.have.property('password');",
+                  "    pm.expect(body).not.to.have.property('passwordHash');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{registrationBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Creates a new user with a generated unique email."
+          },
+          "response": []
+        },
+        {
+          "name": "Register Invalid User (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Response describes name, email, and password validation errors', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.be.an('object');",
+                  "    pm.expect(body.errors).to.be.an('object');",
+                  "    ['Name', 'Email', 'Password'].forEach(key => pm.expect(body.errors[key]).to.be.an('array').that.is.not.empty);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"email\": \"not-an-email\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Checks validation errors for all required fields."
+          },
+          "response": []
+        },
+        {
+          "name": "Register Duplicate Email (409)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const email = `revivo-${pm.variables.replaceIn('{{$guid}}')}@example.com`;",
+                  "const password = pm.environment.get('testPassword') || `Revivo-${pm.variables.replaceIn('{{$guid}}')}-aA1!`;",
+                  "pm.variables.set('registrationEmail', email);",
+                  "pm.variables.set('registrationPassword', password);",
+                  "pm.environment.set('testEmail', email);",
+                  "pm.variables.set('registrationBody', JSON.stringify({ name: 'Revivo Test User', email, password }));",
+                  "pm.sendRequest({",
+                  "    url: pm.variables.replaceIn('{{baseUrl}}/api/auth/register'),",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json' },",
+                  "    body: { mode: 'raw', raw: pm.variables.get('registrationBody') }",
+                  "}, (error, response) => {",
+                  "    pm.test('Duplicate fixture was registered successfully', () => {",
+                  "        pm.expect(error).to.equal(null);",
+                  "        pm.expect(response.code).to.equal(201);",
+                  "    });",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409 Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('Response explains the duplicate email', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.message).to.be.a('string').and.to.include('email');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{registrationBody}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Creates a unique fixture and then submits the same registration again."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
