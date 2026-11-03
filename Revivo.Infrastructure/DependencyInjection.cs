@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,10 @@ public static class DependencyInjection
                 ?? throw new InvalidOperationException("Connection string 'RevivoDb' is not configured.");
             options.UseSqlServer(connectionString);
         });
+
+        services.AddIdentityCore<IdentityUser<Guid>>()
+            .AddRoles<IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<RevivoDbContext>();
 
         return services;
     }
