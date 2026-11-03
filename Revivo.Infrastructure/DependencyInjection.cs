@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Revivo.Infrastructure.Persistence;
 using Revivo.Infrastructure.Identity;
 using Revivo.Application.Authentication;
+using Revivo.Application.Vehicles;
+using Revivo.Infrastructure.Vehicles;
 
 namespace Revivo.Infrastructure;
 
@@ -25,6 +27,9 @@ public static class DependencyInjection
 
         services.AddScoped<IRegistrationService, RegistrationService>();
         services.AddScoped<ILoginService, LoginService>();
+
+        services.AddScoped<ICarCatalogService, CarCatalogService>();
+        services.AddScoped<IVehicleService, VehicleService>();
 
         return services;
     }
