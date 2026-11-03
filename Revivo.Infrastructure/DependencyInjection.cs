@@ -7,6 +7,7 @@ using Revivo.Infrastructure.Identity;
 using Revivo.Application.Authentication;
 using Revivo.Application.Vehicles;
 using Revivo.Infrastructure.Vehicles;
+using Revivo.Infrastructure.Catalog;
 
 namespace Revivo.Infrastructure;
 
@@ -30,6 +31,7 @@ public static class DependencyInjection
 
         services.AddScoped<ICarCatalogService, CarCatalogService>();
         services.AddScoped<IVehicleService, VehicleService>();
+        services.AddScoped<CarCatalogSeeder>();
 
         return services;
     }

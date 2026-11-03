@@ -709,7 +709,8 @@
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "const models = pm.response.json();",
                   "pm.test('Models are DTOs', () => pm.expect(models).to.be.an('array'));",
-                  "if (models.length) pm.collectionVariables.set('carModelId', String(models[0].id));"
+                  "if (models.length) pm.collectionVariables.set('carModelId', String(models[0].id));",
+                  "pm.test('Model year bounds are present', () => models.forEach(model => { pm.expect(model).to.have.property('yearStart'); pm.expect(model).to.have.property('yearEnd'); }));"
                 ]
               }
             }
@@ -728,7 +729,7 @@
                 "models"
               ]
             },
-            "description": "Set makeId to an existing make ID; saves the first returned model ID."
+            "description": "Set makeId to an existing make ID; saves the first returned model ID. Optional search query filters model names."
           },
           "response": []
         },
@@ -940,6 +941,70 @@
                 }
               ]
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Car Models",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Matching models returned', () => { pm.response.to.have.status(200); pm.response.json().forEach(model => pm.expect(model.name.toLowerCase()).to.include('corolla')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/car-catalog/models?makeId={{makeId}}&search=corolla",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "car-catalog",
+                "models"
+              ]
+            },
+            "description": "Catalog data is sourced from gor3a/vehicle-makes-models (ODbL 1.0)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Model Years",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Years returned in descending order', () => { pm.response.to.have.status(200); const years = pm.response.json(); pm.expect(years).to.be.an('array'); pm.expect(years).to.deep.equal([...years].sort((a,b) => b-a)); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/car-catalog/models/{{carModelId}}/years",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "car-catalog",
+                "models",
+                "{{carModelId}}",
+                "years"
+              ]
+            },
+            "description": "Catalog data is sourced from gor3a/vehicle-makes-models (ODbL 1.0)."
           },
           "response": []
         }

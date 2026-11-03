@@ -190,12 +190,21 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("YearEnd")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("YearStart")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CarMakeId", "Name")
                         .IsUnique();
 
-                    b.ToTable("CarModels");
+                    b.ToTable("CarModels", t =>
+                        {
+                            t.HasCheckConstraint("CK_CarModels_Years", "([YearStart] IS NULL OR [YearStart] >= 1886) AND ([YearEnd] IS NULL OR [YearEnd] >= [YearStart])");
+                        });
                 });
 
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
