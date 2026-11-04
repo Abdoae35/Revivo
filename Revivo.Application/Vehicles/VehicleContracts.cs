@@ -15,8 +15,9 @@ public interface ICarCatalogService
     Task<CarImageModelDto?> GetModelForImageAsync(int modelId, CancellationToken cancellationToken);
 }
 
-public enum VehicleWriteStatus { Success, NotFound, InvalidModel }
+public enum VehicleWriteStatus { Success, NotFound, InvalidModel, MileageBelowMaintenance }
 public sealed record VehicleWriteResult(VehicleWriteStatus Status, VehicleDto? Vehicle = null);
+public enum VehicleDeleteStatus { Deleted, NotFound, HasMaintenance }
 
 public interface IVehicleService
 {
@@ -24,5 +25,5 @@ public interface IVehicleService
     Task<IReadOnlyList<VehicleDto>> GetAllAsync(Guid ownerId, CancellationToken cancellationToken);
     Task<VehicleDto?> GetAsync(Guid ownerId, int id, CancellationToken cancellationToken);
     Task<VehicleWriteResult> UpdateAsync(Guid ownerId, int id, VehicleInput input, CancellationToken cancellationToken);
-    Task<bool> DeleteAsync(Guid ownerId, int id, CancellationToken cancellationToken);
+    Task<VehicleDeleteStatus> DeleteAsync(Guid ownerId, int id, CancellationToken cancellationToken);
 }

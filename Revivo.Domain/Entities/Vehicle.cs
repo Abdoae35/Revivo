@@ -9,6 +9,7 @@ public sealed class Vehicle
     public Guid OwnerId { get; set; }
     public int CarModelId { get; set; }
     public CarModel CarModel { get; set; } = null!;
+    public ICollection<MaintenanceRecord> MaintenanceRecords { get; set; } = new List<MaintenanceRecord>();
 
     public required int Year
     {

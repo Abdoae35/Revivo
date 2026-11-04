@@ -66,6 +66,7 @@ public class VehicleEndpointTests
             Task.FromResult<VehicleDto?>(ownerId == owner ? new VehicleDto(id, owner, 1, 2024, 100, null, null, DateTimeOffset.UtcNow) : null);
         public Task<VehicleWriteResult> UpdateAsync(Guid ownerId, int id, VehicleInput input, CancellationToken cancellationToken) =>
             Task.FromResult(new VehicleWriteResult(VehicleWriteStatus.NotFound));
-        public Task<bool> DeleteAsync(Guid ownerId, int id, CancellationToken cancellationToken) => Task.FromResult(false);
+        public Task<VehicleDeleteStatus> DeleteAsync(Guid ownerId, int id, CancellationToken cancellationToken) =>
+            Task.FromResult(VehicleDeleteStatus.NotFound);
     }
 }

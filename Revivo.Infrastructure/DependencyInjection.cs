@@ -9,6 +9,8 @@ using Revivo.Application.Vehicles;
 using Revivo.Infrastructure.Vehicles;
 using Revivo.Infrastructure.Catalog;
 using Revivo.Infrastructure.Images;
+using Revivo.Application.Maintenance;
+using Revivo.Infrastructure.Maintenance;
 
 namespace Revivo.Infrastructure;
 
@@ -32,6 +34,7 @@ public static class DependencyInjection
 
         services.AddScoped<ICarCatalogService, CarCatalogService>();
         services.AddScoped<IVehicleService, VehicleService>();
+        services.AddScoped<IMaintenanceService, MaintenanceService>();
         services.AddScoped<CarCatalogSeeder>();
         services.AddMemoryCache();
         services.AddHttpClient("Unsplash", client =>

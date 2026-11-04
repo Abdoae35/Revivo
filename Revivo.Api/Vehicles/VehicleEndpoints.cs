@@ -50,6 +50,7 @@ public static class VehicleEndpoints
         {
             VehicleWriteStatus.NotFound => Results.NotFound(),
             VehicleWriteStatus.InvalidModel => Results.ValidationProblem(new Dictionary<string, string[]> { ["CarModelId"] = ["Car model does not exist."] }),
+            VehicleWriteStatus.MileageBelowMaintenance => Results.ValidationProblem(new Dictionary<string, string[]> { ["CurrentMileageKm"] = ["Mileage cannot be below recorded maintenance mileage."] }),
             _ => Results.Ok(result.Vehicle)
         };
     }
@@ -57,7 +58,12 @@ public static class VehicleEndpoints
     private static async Task<IResult> DeleteAsync(int id, ClaimsPrincipal principal, IVehicleService vehicles, CancellationToken cancellationToken)
     {
         if (!TryOwner(principal, out var ownerId)) return Results.Unauthorized();
-        return await vehicles.DeleteAsync(ownerId, id, cancellationToken) ? Results.NoContent() : Results.NotFound();
+        return await vehicles.DeleteAsync(ownerId, id, cancellationToken) switch
+        {
+            VehicleDeleteStatus.Deleted => Results.NoContent(),
+            VehicleDeleteStatus.HasMaintenance => Results.Conflict(new { message = "Delete maintenance records before deleting this vehicle." }),
+            _ => Results.NotFound()
+        };
     }
 
     private static bool TryOwner(ClaimsPrincipal principal, out Guid ownerId) =>

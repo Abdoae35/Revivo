@@ -207,6 +207,101 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .UseCollation("SQL_Latin1_General_CP1_CI_AS");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("MaintenanceCategories", (string)null);
+                });
+
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MaintenanceCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .UseCollation("SQL_Latin1_General_CP1_CI_AS");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaintenanceCategoryId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("MaintenanceItems", (string)null);
+                });
+
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CostEgp")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("MaintenanceDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("MaintenanceItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MileageKm")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaintenanceItemId");
+
+                    b.HasIndex("VehicleId", "MaintenanceDate", "CreatedAt", "Id")
+                        .IsDescending(false, true, true, true);
+
+                    b.ToTable("MaintenanceRecords", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MaintenanceRecords_CostEgp", "[CostEgp] >= 0");
+
+                            t.HasCheckConstraint("CK_MaintenanceRecords_MaintenanceDate", "[MaintenanceDate] >= '1886-01-01' AND [MaintenanceDate] <= CONVERT(date, GETUTCDATE())");
+
+                            t.HasCheckConstraint("CK_MaintenanceRecords_MileageKm", "[MileageKm] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -384,6 +479,36 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("CarMake");
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceItem", b =>
+                {
+                    b.HasOne("Revivo.Domain.Entities.MaintenanceCategory", "Category")
+                        .WithMany("Items")
+                        .HasForeignKey("MaintenanceCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceRecord", b =>
+                {
+                    b.HasOne("Revivo.Domain.Entities.MaintenanceItem", "Item")
+                        .WithMany("Records")
+                        .HasForeignKey("MaintenanceItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Revivo.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany("MaintenanceRecords")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.HasOne("Revivo.Domain.Entities.CarModel", "CarModel")
@@ -403,6 +528,21 @@ namespace Revivo.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Revivo.Domain.Entities.CarModel", b =>
                 {
                     b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceCategory", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceItem", b =>
+                {
+                    b.Navigation("Records");
+                });
+
+            modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
+                {
+                    b.Navigation("MaintenanceRecords");
                 });
 #pragma warning restore 612, 618
         }
