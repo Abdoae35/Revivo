@@ -36,7 +36,7 @@ public sealed class MaintenanceService(RevivoDbContext db) : IMaintenanceService
         var items = await query.OrderByDescending(record => record.MaintenanceDate)
             .ThenByDescending(record => record.CreatedAt).ThenByDescending(record => record.Id)
             .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(record => new MaintenanceDto(record.Id, record.VehicleId, record.Item.Category.Name,
+            .Select(record => new MaintenanceDto(record.Id, record.VehicleId, record.MaintenanceItemId, record.Item.Category.Name,
                 record.Item.Name, record.MaintenanceDate, record.MileageKm, record.CostEgp,
                 record.Notes, record.CreatedAt)).ToListAsync(cancellationToken);
         return new MaintenancePage(page, pageSize, total, items);
@@ -45,7 +45,7 @@ public sealed class MaintenanceService(RevivoDbContext db) : IMaintenanceService
     public async Task<MaintenanceDto?> GetAsync(Guid ownerId, int vehicleId, int id, CancellationToken cancellationToken) =>
         await db.MaintenanceRecords.AsNoTracking()
             .Where(record => record.Id == id && record.VehicleId == vehicleId && record.Vehicle.OwnerId == ownerId)
-            .Select(record => new MaintenanceDto(record.Id, record.VehicleId, record.Item.Category.Name,
+            .Select(record => new MaintenanceDto(record.Id, record.VehicleId, record.MaintenanceItemId, record.Item.Category.Name,
                 record.Item.Name, record.MaintenanceDate, record.MileageKm, record.CostEgp,
                 record.Notes, record.CreatedAt)).SingleOrDefaultAsync(cancellationToken);
 
@@ -112,6 +112,6 @@ public sealed class MaintenanceService(RevivoDbContext db) : IMaintenanceService
     }
 
     private static MaintenanceDto ToDto(MaintenanceRecord record, string category, string itemName) =>
-        new(record.Id, record.VehicleId, category, itemName, record.MaintenanceDate,
+        new(record.Id, record.VehicleId, record.MaintenanceItemId, category, itemName, record.MaintenanceDate,
             record.MileageKm, record.CostEgp, record.Notes, record.CreatedAt);
 }

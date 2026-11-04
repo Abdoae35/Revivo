@@ -302,6 +302,51 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("IntervalKm")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IntervalMonths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaintenanceItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarningDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarningKm")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaintenanceItemId");
+
+                    b.HasIndex("VehicleId", "MaintenanceItemId")
+                        .IsUnique();
+
+                    b.ToTable("MaintenanceSchedules", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MaintenanceSchedules_IntervalKm", "[IntervalKm] IS NULL OR [IntervalKm] > 0");
+
+                            t.HasCheckConstraint("CK_MaintenanceSchedules_IntervalMonths", "[IntervalMonths] IS NULL OR [IntervalMonths] BETWEEN 1 AND 1200");
+
+                            t.HasCheckConstraint("CK_MaintenanceSchedules_WarningDays", "[WarningDays] >= 0");
+
+                            t.HasCheckConstraint("CK_MaintenanceSchedules_WarningKm", "[WarningKm] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -509,6 +554,25 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceSchedule", b =>
+                {
+                    b.HasOne("Revivo.Domain.Entities.MaintenanceItem", "Item")
+                        .WithMany("Schedules")
+                        .HasForeignKey("MaintenanceItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Revivo.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany("MaintenanceSchedules")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.HasOne("Revivo.Domain.Entities.CarModel", "CarModel")
@@ -538,11 +602,15 @@ namespace Revivo.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceItem", b =>
                 {
                     b.Navigation("Records");
+
+                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.Navigation("MaintenanceRecords");
+
+                    b.Navigation("MaintenanceSchedules");
                 });
 #pragma warning restore 612, 618
         }

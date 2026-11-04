@@ -90,7 +90,7 @@ public class MaintenanceEndpointTests
             LastVehicleId = vehicleId;
             CreateCalls++;
             return Task.FromResult(new MaintenanceWriteResult(MaintenanceWriteStatus.Success,
-                new MaintenanceDto(1, vehicleId, input.Category!, input.ItemName!, input.MaintenanceDate,
+                new MaintenanceDto(1, vehicleId, 1, input.Category!, input.ItemName!, input.MaintenanceDate,
                     input.MileageKm, input.CostEgp, input.Notes, DateTimeOffset.UtcNow)));
         }
 

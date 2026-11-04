@@ -1231,7 +1231,9 @@
                   "pm.test('Created',()=>pm.response.to.have.status(201));",
                   "const item=pm.response.json();",
                   "pm.test('Record has expected fields',()=>{pm.expect(item.id).to.be.a('number');pm.expect(item.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId')));pm.expect(item.category).to.equal('Fluids');pm.expect(item.itemName).to.equal('Engine Oil');pm.expect(item.costEgp).to.equal(850.5);});",
-                  "pm.collectionVariables.set('maintenanceId',String(item.id));"
+                  "pm.collectionVariables.set('maintenanceId',String(item.id));",
+                  "pm.test('Reusable item ID is present',()=>pm.expect(item.itemId).to.be.a('number').above(0));",
+                  "pm.collectionVariables.set('maintenanceItemId',String(item.itemId));"
                 ]
               }
             }
@@ -1822,6 +1824,471 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Periodic Maintenance",
+      "item": [
+        {
+          "name": "Configure Mileage-Based Schedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Schedule returns 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Item and warning settings returned',()=>{const item=pm.response.json();pm.expect(item.itemId).to.equal(Number(pm.collectionVariables.get('maintenanceItemId')));pm.expect(item.warningKm).to.equal(1000);pm.expect(item.warningDays).to.equal(30);pm.expect(['OnTrack','DueSoon','Overdue']).to.include(item.status);});",
+                  "pm.test('Mileage schedule',()=>{const item=pm.response.json();pm.expect(item.intervalKm).to.equal(10000);pm.expect(item.intervalMonths).to.equal(null);if(item.lastMaintenanceMileage!==null)pm.expect(item.nextDueMileageKm).to.equal(item.lastMaintenanceMileage+10000);});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance-items/{{maintenanceItemId}}/schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance-items",
+                "{{maintenanceItemId}}",
+                "schedule"
+              ]
+            },
+            "description": "Run Add Maintenance first to save maintenanceItemId.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"intervalKm\": 10000,\n  \"intervalMonths\": null,\n  \"warningKm\": 1000,\n  \"warningDays\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Configure Time-Based Schedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Schedule returns 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Item and warning settings returned',()=>{const item=pm.response.json();pm.expect(item.itemId).to.equal(Number(pm.collectionVariables.get('maintenanceItemId')));pm.expect(item.warningKm).to.equal(1000);pm.expect(item.warningDays).to.equal(30);pm.expect(['OnTrack','DueSoon','Overdue']).to.include(item.status);});",
+                  "pm.test('Time schedule',()=>{const item=pm.response.json();pm.expect(item.intervalKm).to.equal(null);pm.expect(item.intervalMonths).to.equal(12);if(item.lastMaintenanceDate!==null)pm.expect(item.nextDueDate).to.be.a('string');});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance-items/{{maintenanceItemId}}/schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance-items",
+                "{{maintenanceItemId}}",
+                "schedule"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"intervalKm\": null,\n  \"intervalMonths\": 12,\n  \"warningKm\": 1000,\n  \"warningDays\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Configure Combined Schedule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Schedule returns 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Item and warning settings returned',()=>{const item=pm.response.json();pm.expect(item.itemId).to.equal(Number(pm.collectionVariables.get('maintenanceItemId')));pm.expect(item.warningKm).to.equal(1000);pm.expect(item.warningDays).to.equal(30);pm.expect(['OnTrack','DueSoon','Overdue']).to.include(item.status);});",
+                  "pm.test('Combined schedule',()=>{const item=pm.response.json();pm.expect(item.intervalKm).to.equal(10000);pm.expect(item.intervalMonths).to.equal(12);});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance-items/{{maintenanceItemId}}/schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance-items",
+                "{{maintenanceItemId}}",
+                "schedule"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"intervalKm\": 10000,\n  \"intervalMonths\": 12,\n  \"warningKm\": 1000,\n  \"warningDays\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Maintenance Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status returns 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Tracked items have due fields',()=>{const items=pm.response.json();pm.expect(items).to.be.an('array');const item=items.find(x=>x.itemId===Number(pm.collectionVariables.get('maintenanceItemId')));pm.expect(item).to.be.an('object');['lastMaintenanceDate','lastMaintenanceMileage','nextDueDate','nextDueMileageKm','remainingDays','remainingKm','status'].forEach(k=>pm.expect(item).to.have.property(k));pm.expect(['OnTrack','DueSoon','Overdue']).to.include(item.status);});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance-status"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Upcoming Maintenance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Upcoming returns 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Only due soon or overdue items returned',()=>{const items=pm.response.json();pm.expect(items).to.be.an('array');items.forEach(item=>pm.expect(['DueSoon','Overdue']).to.include(item.status));});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/upcoming-maintenance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "upcoming-maintenance"
+              ]
+            },
+            "description": "Only DueSoon and Overdue items appear.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Interval",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid interval returns 400',()=>pm.response.to.have.status(400));",
+                  "pm.test('Interval error returned',()=>pm.expect(pm.response.json().errors).to.have.property('intervalKm'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance-items/{{maintenanceItemId}}/schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance-items",
+                "{{maintenanceItemId}}",
+                "schedule"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"intervalKm\": 0,\n  \"intervalMonths\": null,\n  \"warningKm\": 1000,\n  \"warningDays\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unauthorized Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Missing token returns 401',()=>pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance-status"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cross-Owner Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Other owner receives 404',()=>pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance-status"
+              ]
+            },
+            "description": "Set otherAccessToken to a different user token; vehicleId must belong to the first user.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Missing Item (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Unknown item returns 404',()=>pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance-items/2147483647/schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance-items",
+                "2147483647",
+                "schedule"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"intervalKm\": 10000,\n  \"intervalMonths\": null,\n  \"warningKm\": 1000,\n  \"warningDays\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1855,6 +2322,10 @@
     },
     {
       "key": "secondMaintenanceId",
+      "value": ""
+    },
+    {
+      "key": "maintenanceItemId",
       "value": ""
     }
   ]

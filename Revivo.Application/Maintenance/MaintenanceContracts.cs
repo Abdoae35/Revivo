@@ -4,7 +4,7 @@ public sealed record MaintenanceInput(
     string? Category, string? ItemName, DateOnly MaintenanceDate, int MileageKm, decimal CostEgp, string? Notes);
 
 public sealed record MaintenanceDto(
-    int Id, int VehicleId, string Category, string ItemName, DateOnly MaintenanceDate,
+    int Id, int VehicleId, int ItemId, string Category, string ItemName, DateOnly MaintenanceDate,
     int MileageKm, decimal CostEgp, string? Notes, DateTimeOffset CreatedAt);
 
 public sealed record MaintenancePage(int Page, int PageSize, int TotalCount, IReadOnlyList<MaintenanceDto> Items);

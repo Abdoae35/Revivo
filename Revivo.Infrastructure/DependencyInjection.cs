@@ -35,6 +35,7 @@ public static class DependencyInjection
         services.AddScoped<ICarCatalogService, CarCatalogService>();
         services.AddScoped<IVehicleService, VehicleService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();
+        services.AddScoped<IPeriodicMaintenanceService, PeriodicMaintenanceService>();
         services.AddScoped<CarCatalogSeeder>();
         services.AddMemoryCache();
         services.AddHttpClient("Unsplash", client =>
