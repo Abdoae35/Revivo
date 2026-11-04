@@ -727,6 +727,12 @@
                 "api",
                 "car-catalog",
                 "models"
+              ],
+              "query": [
+                {
+                  "key": "makeId",
+                  "value": "{{makeId}}"
+                }
               ]
             },
             "description": "Set makeId to an existing make ID; saves the first returned model ID. Optional search query filters model names."
@@ -759,6 +765,12 @@
                 "api",
                 "car-catalog",
                 "makes"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "toyota"
+                }
               ]
             },
             "description": ""
@@ -969,6 +981,16 @@
                 "api",
                 "car-catalog",
                 "models"
+              ],
+              "query": [
+                {
+                  "key": "makeId",
+                  "value": "{{makeId}}"
+                },
+                {
+                  "key": "search",
+                  "value": "corolla"
+                }
               ]
             },
             "description": "Catalog data is sourced from gor3a/vehicle-makes-models (ODbL 1.0)."
@@ -1024,7 +1046,7 @@
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "const image = pm.response.json();",
                   "pm.test('Image response is explicit', () => { pm.expect(['found','noImage','unavailable','rateLimited','notConfigured']).to.include(image.status); pm.expect(image.isExactVehicle).to.equal(false); pm.expect(image.message).to.be.a('string'); });",
-                  "pm.test('Found photos include hotlinked URL and attribution', () => { if (image.status === 'found') { pm.expect(image.imageUrl).to.match(/^https:\\/\\/images\\.unsplash\\.com\\//); pm.expect(image.photographerName).to.be.a('string').and.not.empty; pm.expect(image.photographerUrl).to.include('utm_source=revivo'); pm.expect(image.photoUrl).to.include('utm_source=revivo'); pm.expect(image.unsplashUrl).to.include('utm_source=revivo'); } else { pm.expect(image.imageUrl).to.equal(null); } });"
+                  "pm.test('Found photos include hotlinked URL and attribution', () => { if (image.status === 'found') { pm.expect(image.imageUrl).to.match(/^https:\\/\\/images\\.unsplash\\.com\\//); pm.expect(image.photographerName).to.be.a('string').and.not.empty; [image.photographerUrl, image.photoUrl, image.unsplashUrl].forEach(url => { pm.expect(url).to.include('utm_source=revivo'); pm.expect(url).to.include('utm_medium=referral'); }); } else { pm.expect(image.imageUrl).to.equal(null); pm.expect(image.photographerName).to.equal(null); pm.expect(image.photographerUrl).to.equal(null); pm.expect(image.photoUrl).to.equal(null); pm.expect(image.unsplashUrl).to.equal(null); } });"
                 ]
               }
             }
@@ -1041,6 +1063,16 @@
                 "api",
                 "car-catalog",
                 "car-image"
+              ],
+              "query": [
+                {
+                  "key": "modelId",
+                  "value": "{{carModelId}}"
+                },
+                {
+                  "key": "year",
+                  "value": "{{carImageYear}}"
+                }
               ]
             },
             "description": "Run Get Car Models first to save carModelId. Set carImageYear within the selected model range. A photo is illustrative, not a verified image of the exact vehicle."
@@ -1072,6 +1104,16 @@
                 "api",
                 "car-catalog",
                 "car-image"
+              ],
+              "query": [
+                {
+                  "key": "modelId",
+                  "value": "99999999"
+                },
+                {
+                  "key": "year",
+                  "value": "2024"
+                }
               ]
             },
             "description": "Uses an unlikely model ID. Change it if that ID exists in your database."
@@ -1105,6 +1147,16 @@
                 "api",
                 "car-catalog",
                 "car-image"
+              ],
+              "query": [
+                {
+                  "key": "modelId",
+                  "value": "{{carModelId}}"
+                },
+                {
+                  "key": "year",
+                  "value": "{{carImageYear}}"
+                }
               ]
             },
             "description": "To exercise noImage, use a valid model and year with no suitable Unsplash result. If Unsplash finds a photo, this request validates its found response instead."
@@ -1137,6 +1189,16 @@
                 "api",
                 "car-catalog",
                 "car-image"
+              ],
+              "query": [
+                {
+                  "key": "modelId",
+                  "value": "{{carModelId}}"
+                },
+                {
+                  "key": "year",
+                  "value": "1800"
+                }
               ]
             },
             "description": "Year 1800 is outside the valid vehicle range."
