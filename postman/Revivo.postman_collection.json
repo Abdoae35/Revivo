@@ -2289,6 +2289,489 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Warranty Tracking",
+      "item": [
+        {
+          "name": "Add Warranty",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Warranty created or replaced',()=>pm.expect([200,201]).to.include(pm.response.code));",
+                  "const warranty=pm.response.json();",
+                  "pm.test('Warranty fields and status',()=>{pm.expect(warranty.maintenanceRecordId).to.equal(Number(pm.collectionVariables.get('maintenanceId')));pm.expect(warranty.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId')));pm.expect(warranty.durationMonths).to.equal(12);pm.expect(warranty.expirationDate).to.be.a('string');pm.expect(warranty.remainingDays).to.be.a('number');pm.expect(['Active','ExpiringSoon','Expired']).to.include(warranty.status);});",
+                  "pm.collectionVariables.set('warrantyCreatedAt',warranty.createdAt);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance/{{maintenanceId}}/warranty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance",
+                "{{maintenanceId}}",
+                "warranty"
+              ]
+            },
+            "description": "Run Add Maintenance first to save maintenanceId. Null startDate uses the maintenance date. First PUT returns 201; repeating it returns 200.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"durationMonths\": 12,\n  \"startDate\": null,\n  \"warningDays\": 30,\n  \"provider\": \"Example Parts Shop\",\n  \"brand\": \"Example Brand\",\n  \"notes\": \"Receipt kept with service history\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Warranty",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Warranty returned',()=>pm.response.to.have.status(200));",
+                  "pm.test('Correct warranty',()=>{const warranty=pm.response.json();pm.expect(warranty.maintenanceRecordId).to.equal(Number(pm.collectionVariables.get('maintenanceId')));pm.expect(warranty.expirationDate).to.be.a('string');pm.expect(warranty.remainingDays).to.be.a('number');});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance/{{maintenanceId}}/warranty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance",
+                "{{maintenanceId}}",
+                "warranty"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Warranty",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Warranty updated',()=>pm.response.to.have.status(200));",
+                  "pm.test('Updated terms and original creation time',()=>{const warranty=pm.response.json();pm.expect(warranty.durationMonths).to.equal(24);pm.expect(warranty.warningDays).to.equal(45);pm.expect(warranty.createdAt).to.equal(pm.collectionVariables.get('warrantyCreatedAt'));});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance/{{maintenanceId}}/warranty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance",
+                "{{maintenanceId}}",
+                "warranty"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"durationMonths\": 24,\n  \"startDate\": null,\n  \"warningDays\": 45,\n  \"provider\": \"Example Parts Shop\",\n  \"brand\": \"Example Brand\",\n  \"notes\": \"Updated warranty terms\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vehicle Warranties",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Warranty list returned',()=>pm.response.to.have.status(200));",
+                  "pm.test('List contains this record',()=>{const warranties=pm.response.json();pm.expect(warranties).to.be.an('array');pm.expect(warranties.some(w=>w.maintenanceRecordId===Number(pm.collectionVariables.get('maintenanceId')))).to.equal(true);warranties.forEach(w=>pm.expect(['Active','ExpiringSoon','Expired']).to.include(w.status));});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/warranties",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "warranties"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Warranty",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid duration returns 400',()=>pm.response.to.have.status(400));",
+                  "pm.test('Duration validation detail',()=>pm.expect(pm.response.json().errors).to.have.property('durationMonths'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance/{{maintenanceId}}/warranty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance",
+                "{{maintenanceId}}",
+                "warranty"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"durationMonths\": 0,\n  \"startDate\": null,\n  \"warningDays\": 30,\n  \"provider\": null,\n  \"brand\": null,\n  \"notes\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unauthorized Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Missing token returns 401',()=>pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/warranties",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "warranties"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cross-Owner Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Other owner receives 404',()=>pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance/{{maintenanceId}}/warranty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance",
+                "{{maintenanceId}}",
+                "warranty"
+              ]
+            },
+            "description": "Set otherAccessToken to a different user token; vehicleId belongs to the first user.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Warranty",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Warranty deleted',()=>pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance/{{maintenanceId}}/warranty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance",
+                "{{maintenanceId}}",
+                "warranty"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Deleted Warranty (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Deleted warranty is not found',()=>pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance/{{maintenanceId}}/warranty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance",
+                "{{maintenanceId}}",
+                "warranty"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Maintenance Record Remains (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Maintenance history remains after warranty deletion',()=>pm.response.to.have.status(200));",
+                  "pm.test('Same record returned',()=>pm.expect(pm.response.json().id).to.equal(Number(pm.collectionVariables.get('maintenanceId'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance/{{maintenanceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance",
+                "{{maintenanceId}}"
+              ]
+            },
+            "description": "Deleting the warranty does not delete its maintenance record.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -2326,6 +2809,10 @@
     },
     {
       "key": "maintenanceItemId",
+      "value": ""
+    },
+    {
+      "key": "warrantyCreatedAt",
       "value": ""
     }
   ]

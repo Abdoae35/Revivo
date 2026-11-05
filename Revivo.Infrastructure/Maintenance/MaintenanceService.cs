@@ -78,6 +78,8 @@ public sealed class MaintenanceService(RevivoDbContext db) : IMaintenanceService
         var record = await db.MaintenanceRecords.SingleOrDefaultAsync(
             entry => entry.Id == id && entry.VehicleId == vehicleId, cancellationToken);
         if (record is null) return MaintenanceWriteStatus.RecordNotFound;
+        if (await db.MaintenanceWarranties.AnyAsync(warranty => warranty.MaintenanceRecordId == id,
+                cancellationToken)) return MaintenanceWriteStatus.HasWarranty;
         db.MaintenanceRecords.Remove(record);
         await db.SaveChangesAsync(cancellationToken);
         return MaintenanceWriteStatus.Success;

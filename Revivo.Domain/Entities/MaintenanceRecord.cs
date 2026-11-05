@@ -11,6 +11,7 @@ public sealed class MaintenanceRecord
     public Vehicle Vehicle { get; set; } = null!;
     public int MaintenanceItemId { get; set; }
     public MaintenanceItem Item { get; set; } = null!;
+    public MaintenanceWarranty? Warranty { get; set; }
 
     public required DateOnly MaintenanceDate
     {

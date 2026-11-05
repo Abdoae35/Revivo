@@ -347,6 +347,47 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceWarranty", b =>
+                {
+                    b.Property<int>("MaintenanceRecordId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("DurationMonths")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Provider")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("WarningDays")
+                        .HasColumnType("int");
+
+                    b.HasKey("MaintenanceRecordId");
+
+                    b.ToTable("MaintenanceWarranties", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MaintenanceWarranties_DurationMonths", "[DurationMonths] BETWEEN 1 AND 1200");
+
+                            t.HasCheckConstraint("CK_MaintenanceWarranties_StartDate", "[StartDate] >= '1886-01-01' AND [StartDate] <= CONVERT(date, GETUTCDATE())");
+
+                            t.HasCheckConstraint("CK_MaintenanceWarranties_WarningDays", "[WarningDays] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -573,6 +614,17 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceWarranty", b =>
+                {
+                    b.HasOne("Revivo.Domain.Entities.MaintenanceRecord", "Record")
+                        .WithOne("Warranty")
+                        .HasForeignKey("Revivo.Domain.Entities.MaintenanceWarranty", "MaintenanceRecordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Record");
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.HasOne("Revivo.Domain.Entities.CarModel", "CarModel")
@@ -604,6 +656,11 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("Records");
 
                     b.Navigation("Schedules");
+                });
+
+            modelBuilder.Entity("Revivo.Domain.Entities.MaintenanceRecord", b =>
+                {
+                    b.Navigation("Warranty");
                 });
 
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>

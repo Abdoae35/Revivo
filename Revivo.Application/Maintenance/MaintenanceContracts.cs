@@ -9,7 +9,7 @@ public sealed record MaintenanceDto(
 
 public sealed record MaintenancePage(int Page, int PageSize, int TotalCount, IReadOnlyList<MaintenanceDto> Items);
 
-public enum MaintenanceWriteStatus { Success, VehicleNotFound, RecordNotFound, InvalidDate }
+public enum MaintenanceWriteStatus { Success, VehicleNotFound, RecordNotFound, InvalidDate, HasWarranty }
 public sealed record MaintenanceWriteResult(MaintenanceWriteStatus Status, MaintenanceDto? Record = null);
 
 public interface IMaintenanceService

@@ -15,6 +15,7 @@ public sealed class RevivoDbContext(DbContextOptions<RevivoDbContext> options) :
     public DbSet<MaintenanceItem> MaintenanceItems => Set<MaintenanceItem>();
     public DbSet<MaintenanceRecord> MaintenanceRecords => Set<MaintenanceRecord>();
     public DbSet<MaintenanceSchedule> MaintenanceSchedules => Set<MaintenanceSchedule>();
+    public DbSet<MaintenanceWarranty> MaintenanceWarranties => Set<MaintenanceWarranty>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

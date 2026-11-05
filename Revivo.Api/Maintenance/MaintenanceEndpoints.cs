@@ -79,7 +79,12 @@ public static class MaintenanceEndpoints
         if (!TryOwner(principal, out var ownerId)) return Results.Unauthorized();
         if (vehicleId <= 0 || id <= 0) return Results.BadRequest();
         var result = await maintenance.DeleteAsync(ownerId, vehicleId, id, cancellationToken);
-        return result == MaintenanceWriteStatus.Success ? Results.NoContent() : Results.NotFound();
+        return result switch
+        {
+            MaintenanceWriteStatus.Success => Results.NoContent(),
+            MaintenanceWriteStatus.HasWarranty => Results.Conflict(new { message = "Delete the warranty before deleting this maintenance record." }),
+            _ => Results.NotFound()
+        };
     }
 
     private static Dictionary<string, string[]> Validate(int vehicleId, MaintenanceInput input)

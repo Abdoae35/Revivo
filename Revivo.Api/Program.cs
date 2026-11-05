@@ -2,6 +2,7 @@ using Revivo.Infrastructure;
 using Revivo.Api.Authentication;
 using Revivo.Api.Vehicles;
 using Revivo.Api.Maintenance;
+using Revivo.Api.Warranties;
 using Revivo.Infrastructure.Catalog;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -57,5 +58,6 @@ app.MapCarCatalogEndpoints();
 app.MapVehicleEndpoints();
 app.MapMaintenanceEndpoints();
 app.MapPeriodicMaintenanceEndpoints();
+app.MapWarrantyEndpoints();
 
 app.Run();
