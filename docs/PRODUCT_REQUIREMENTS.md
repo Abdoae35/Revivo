@@ -89,7 +89,7 @@ Vehicle management, warranties, settings, and forms should be accessible through
 
 ## 4. Visual Design Direction
 
-Use the installed `design-taste-frontend` skill and adapt its relevant principles for mobile UI/UX.
+Use the visual direction below as the design guidance for mobile UI/UX.
 
 Design style:
 - Premium minimal automotive aesthetic
@@ -137,8 +137,6 @@ Design complete flows for:
 ## 7. Execution Instructions
 
 First, save this complete brief inside the Revivo repository as `docs/PRODUCT_REQUIREMENTS.md`.
-
-Then read `.agents/skills/design-taste-frontend/SKILL.md` and apply its relevant design principles.
 
 Use the connected Figma tools to build the complete UI/UX in the existing Figma file.
 
