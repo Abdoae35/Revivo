@@ -14,7 +14,7 @@ Statistics and expense analytics are implemented on `feature/statistics-expenses
 - Added nine requests and response scripts in the existing Postman collection under Statistics & Expenses. Added calculation, endpoint, and SQL integration tests; the SQL fixture inserts temporary data inside a transaction and rolls it back. Corrected the existing notification SQL test's environment gate because its dynamic skip was reported as a failure by this xUnit runner.
 - Verification: `dotnet restore Revivo.slnx` succeeded; `dotnet build Revivo.slnx --no-restore -m:1 -nr:false` succeeded with zero warnings/errors; default `dotnet test Revivo.slnx --no-restore -m:1 -nr:false` passed 67/67; SQL-enabled `REVIVO_SQL_INTEGRATION=1 dotnet test Revivo.Api.Tests/Revivo.Api.Tests.csproj --no-build --no-restore -m:1 -nr:false` passed 67/67. The SQL fixture caught a 0.02 km annual rounding error, which was corrected before the passing rerun. `git diff --check` passed.
 - The sandbox denied the SQL test runner's local socket; unrestricted execution passed. No persistent fixture data was left in SQL Server.
-- Commit/push: pure analytics commit `f1a17ed` pushed to `origin/feature/statistics-expenses`; endpoint, Postman, integration test, and documentation commit pending at this checkpoint.
+- Commit/push: pure analytics `f1a17ed` and API/Postman `a42a70b` pushed to `origin/feature/statistics-expenses`; this status update is documented in a follow-up commit.
 - Remaining work: none for the requested API. A Flutter dashboard can consume the current endpoints.
 
 ### 2026-11-15 — Implement notification settings and alerts
