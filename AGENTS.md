@@ -4,4 +4,4 @@ Maintain one project-wide Postman collection at `postman/Revivo.postman_collecti
 
 ## Current handoff
 
-Notification settings and alert aggregation are implemented on `feature/notifications`. The additive migration was applied to the configured SQL Server, and an opt-in integration test verifies settings persistence and ownership with a rolled-back transaction. See [PROJECT_HISTORY.md](PROJECT_HISTORY.md) for details.
+Statistics and expense analytics are implemented on `feature/statistics-expenses`. They use existing odometer and maintenance tables; no migration is needed. The SQL integration test uses a rolled-back fixture. See [PROJECT_HISTORY.md](PROJECT_HISTORY.md) for the calculation rules and verification.

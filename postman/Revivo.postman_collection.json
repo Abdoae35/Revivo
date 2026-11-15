@@ -3561,6 +3561,431 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Statistics & Expenses",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.variables.set('statisticsYear', String(new Date().getUTCFullYear()));"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "Get Vehicle Statistics Overview",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Owned overview schema', () => { pm.expect(body.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId'))); pm.expect(body.currentMileageKm).to.be.a('number'); pm.expect(body.currency).to.equal('EGP'); pm.expect(body.lifetimeMaintenanceCost).to.be.at.least(0); pm.expect(body.thisMonthMaintenanceCost).to.be.at.least(0); pm.expect(body.thisYearMaintenanceCost).to.be.at.least(0); pm.expect(body.maintenanceOperationsCount).to.be.at.least(0); ['thisMonthDistanceStatus','thisYearDistanceStatus'].forEach(k => pm.expect(body[k]).to.be.oneOf(['Exact','Estimated','Unavailable'])); if (body.thisMonthDistanceStatus === 'Unavailable') pm.expect(body.thisMonthDistanceKm).to.equal(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "overview"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Get Monthly Mileage Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Owned mileage chart schema', () => { pm.expect(body.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId'))); pm.expect(body.year).to.be.a('number'); pm.expect(body.currentMileageKm).to.be.a('number'); pm.expect(body.monthlyDistanceKm).to.be.an('array').with.lengthOf(12); pm.expect(body.totalYearDistanceStatus).to.be.oneOf(['Exact', 'Estimated', 'Unavailable']); body.monthlyDistanceKm.forEach((x,i) => { pm.expect(x.month).to.equal(i+1); pm.expect(x.status).to.be.oneOf(['Exact', 'Estimated', 'Unavailable']); if (x.status === 'Unavailable') pm.expect(x.distanceKm).to.equal(null); else pm.expect(x.distanceKm).to.be.at.least(0); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/mileage",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "mileage"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Get Yearly Mileage Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Owned mileage chart schema', () => { pm.expect(body.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId'))); pm.expect(body.year).to.be.a('number'); pm.expect(body.currentMileageKm).to.be.a('number'); pm.expect(body.monthlyDistanceKm).to.be.an('array').with.lengthOf(12); pm.expect(body.totalYearDistanceStatus).to.be.oneOf(['Exact', 'Estimated', 'Unavailable']); body.monthlyDistanceKm.forEach((x,i) => { pm.expect(x.month).to.equal(i+1); pm.expect(x.status).to.be.oneOf(['Exact', 'Estimated', 'Unavailable']); if (x.status === 'Unavailable') pm.expect(x.distanceKm).to.equal(null); else pm.expect(x.distanceKm).to.be.at.least(0); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/mileage?year={{statisticsYear}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "mileage"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "{{statisticsYear}}"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Get Monthly Expenses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Owned EGP expense chart schema', () => { pm.expect(body.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId'))); pm.expect(body.year).to.be.a('number'); pm.expect(body.currency).to.equal('EGP'); pm.expect(body.totalExpenses).to.be.at.least(0); pm.expect(body.monthlyExpenses).to.be.an('array').with.lengthOf(12); pm.expect(body.expensesByCategory).to.be.an('array'); pm.expect(body.topExpensiveMaintenanceRecords).to.be.an('array'); body.monthlyExpenses.forEach((x,i) => { pm.expect(x.month).to.equal(i+1); pm.expect(x.amountEgp).to.be.at.least(0); }); if (body.maintenanceOperationsCount === 0) { pm.expect(body.totalExpenses).to.equal(0); pm.expect(body.expensesByCategory).to.be.empty; pm.expect(body.topExpensiveMaintenanceRecords).to.be.empty; } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/expenses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "expenses"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Get Yearly Expenses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Owned EGP expense chart schema', () => { pm.expect(body.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId'))); pm.expect(body.year).to.be.a('number'); pm.expect(body.currency).to.equal('EGP'); pm.expect(body.totalExpenses).to.be.at.least(0); pm.expect(body.monthlyExpenses).to.be.an('array').with.lengthOf(12); pm.expect(body.expensesByCategory).to.be.an('array'); pm.expect(body.topExpensiveMaintenanceRecords).to.be.an('array'); body.monthlyExpenses.forEach((x,i) => { pm.expect(x.month).to.equal(i+1); pm.expect(x.amountEgp).to.be.at.least(0); }); if (body.maintenanceOperationsCount === 0) { pm.expect(body.totalExpenses).to.equal(0); pm.expect(body.expensesByCategory).to.be.empty; pm.expect(body.topExpensiveMaintenanceRecords).to.be.empty; } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/expenses?year={{statisticsYear}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "expenses"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "{{statisticsYear}}"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Year",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Year validation returned', () => pm.expect(pm.response.json().errors).to.have.property('year'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/mileage?year=1800",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "mileage"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "1800"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Unauthorized Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "overview"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Cross-Owner Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "overview"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Set otherAccessToken to a different user token; vehicleId belongs to the first user."
+          },
+          "response": []
+        },
+        {
+          "name": "Vehicle Not Found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/2147483647/statistics/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "2147483647",
+                "statistics",
+                "overview"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Temporarily replace vehicleId with a nonexistent ID for this request."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [

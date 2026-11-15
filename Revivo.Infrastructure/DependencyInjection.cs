@@ -15,6 +15,8 @@ using Revivo.Application.Warranties;
 using Revivo.Infrastructure.Warranties;
 using Revivo.Application.Notifications;
 using Revivo.Infrastructure.Notifications;
+using Revivo.Application.Statistics;
+using Revivo.Infrastructure.Statistics;
 
 namespace Revivo.Infrastructure;
 
@@ -43,6 +45,7 @@ public static class DependencyInjection
         services.AddScoped<IPeriodicMaintenanceService, PeriodicMaintenanceService>();
         services.AddScoped<IWarrantyService, WarrantyService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IStatisticsService, StatisticsService>();
         services.AddScoped<CarCatalogSeeder>();
         services.AddMemoryCache();
         services.AddHttpClient("Unsplash", client =>

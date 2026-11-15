@@ -2,9 +2,20 @@
 
 ## Current state
 
-Notification settings and alert aggregation are implemented on `feature/notifications`. Migration `20261115135625_AddNotificationSettings` is applied to the configured SQL Server. EF reports the earlier odometer migration as applied as well. Firebase and push delivery are not implemented.
+Statistics and expense analytics are implemented on `feature/statistics-expenses` using existing odometer, vehicle, and maintenance tables. No schema change or migration was required. The prior notification and mileage migrations are applied in the configured SQL Server.
 
 ## Operations
+
+### 2026-11-15 — Implement statistics and expenses
+
+- Added pure `MileageAnalyticsCalculator` in Domain. It linearly interpolates between UTC readings, never extrapolates beyond the first or last reading, marks estimated and unavailable periods, and marks the last covered month/year as partial. Annual distance is calculated directly at period boundaries to avoid summing rounded chart values.
+- Added pure `ExpenseAnalyticsCalculator` and statistics contracts in Application. Expenses use maintenance dates and decimal EGP costs; annual responses include 12 months, category totals, five largest records, and operation count.
+- Added `StatisticsService` in Infrastructure and three JWT-protected routes in API: `/api/vehicles/{vehicleId}/statistics/overview`, `/mileage`, and `/expenses`. All queries filter by authenticated vehicle owner. No database tables or migrations were added.
+- Added nine requests and response scripts in the existing Postman collection under Statistics & Expenses. Added calculation, endpoint, and SQL integration tests; the SQL fixture inserts temporary data inside a transaction and rolls it back. Corrected the existing notification SQL test's environment gate because its dynamic skip was reported as a failure by this xUnit runner.
+- Verification: `dotnet restore Revivo.slnx` succeeded; `dotnet build Revivo.slnx --no-restore -m:1 -nr:false` succeeded with zero warnings/errors; default `dotnet test Revivo.slnx --no-restore -m:1 -nr:false` passed 67/67; SQL-enabled `REVIVO_SQL_INTEGRATION=1 dotnet test Revivo.Api.Tests/Revivo.Api.Tests.csproj --no-build --no-restore -m:1 -nr:false` passed 67/67. The SQL fixture caught a 0.02 km annual rounding error, which was corrected before the passing rerun. `git diff --check` passed.
+- The sandbox denied the SQL test runner's local socket; unrestricted execution passed. No persistent fixture data was left in SQL Server.
+- Commit/push: pure analytics commit `f1a17ed` pushed to `origin/feature/statistics-expenses`; endpoint, Postman, integration test, and documentation commit pending at this checkpoint.
+- Remaining work: none for the requested API. A Flutter dashboard can consume the current endpoints.
 
 ### 2026-11-15 — Implement notification settings and alerts
 
