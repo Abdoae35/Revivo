@@ -13,7 +13,7 @@ Mileage tracking code and Postman requests are in place on `feature/mileage-noti
 - Added the seven requested requests and response scripts to the existing `postman/Revivo.postman_collection.json` under Mileage Tracking. Added endpoint, domain, mapping, and calculator tests in `Revivo.Api.Tests/OdometerTests.cs`.
 - Verification: `dotnet restore Revivo.slnx` succeeded; `dotnet build Revivo.slnx --no-restore` succeeded with no warnings or errors; `dotnet test Revivo.slnx --no-restore` passed 50/50 tests; `git diff --check` passed. SQL Server integration and data persistence were not tested.
 - Database application: `dotnet ef database update --project Revivo.Infrastructure --startup-project Revivo.Api --no-build` failed both in the sandbox and with unrestricted network access: SQL Server connection refused (error 10061). No database reset or data removal was attempted.
-- Commit/push: pending at this checkpoint.
+- Commit/push: implementation committed as `dc0e7ac` and pushed to `origin/feature/mileage-notifications`; this history status update is documented in a follow-up commit.
 - Remaining work: apply the migration and run SQL Server integration checks when the configured server is reachable.
 
 ### 2026-11-15 — Remove the tast skill from the application repo
