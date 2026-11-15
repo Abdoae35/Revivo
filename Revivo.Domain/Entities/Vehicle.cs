@@ -11,6 +11,7 @@ public sealed class Vehicle
     public CarModel CarModel { get; set; } = null!;
     public ICollection<MaintenanceRecord> MaintenanceRecords { get; set; } = new List<MaintenanceRecord>();
     public ICollection<MaintenanceSchedule> MaintenanceSchedules { get; set; } = new List<MaintenanceSchedule>();
+    public ICollection<OdometerReading> OdometerReadings { get; set; } = new List<OdometerReading>();
 
     public required int Year
     {

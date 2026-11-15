@@ -11,6 +11,7 @@ public sealed class RevivoDbContext(DbContextOptions<RevivoDbContext> options) :
     public DbSet<CarMake> CarMakes => Set<CarMake>();
     public DbSet<CarModel> CarModels => Set<CarModel>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<OdometerReading> OdometerReadings => Set<OdometerReading>();
     public DbSet<MaintenanceCategory> MaintenanceCategories => Set<MaintenanceCategory>();
     public DbSet<MaintenanceItem> MaintenanceItems => Set<MaintenanceItem>();
     public DbSet<MaintenanceRecord> MaintenanceRecords => Set<MaintenanceRecord>();

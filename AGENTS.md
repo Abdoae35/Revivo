@@ -4,4 +4,4 @@ Maintain one project-wide Postman collection at `postman/Revivo.postman_collecti
 
 ## Current handoff
 
-The vendored `design-taste-frontend` skill was removed from this repository; see [PROJECT_HISTORY.md](PROJECT_HISTORY.md) for the operation record. Continue using the visual direction in `docs/PRODUCT_REQUIREMENTS.md` as project guidance.
+Mileage tracking is implemented on `feature/mileage-notifications`. The additive migration is generated but SQL Server refused the connection, so apply it and run database integration checks when the server is available. See [PROJECT_HISTORY.md](PROJECT_HISTORY.md) for details.

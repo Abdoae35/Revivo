@@ -388,6 +388,37 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.OdometerReading", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MileageKm")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("RecordedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleId", "RecordedAt", "Id")
+                        .IsDescending(false, true, true);
+
+                    b.ToTable("OdometerReadings", t =>
+                        {
+                            t.HasCheckConstraint("CK_OdometerReadings_MileageKm", "[MileageKm] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -625,6 +656,17 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("Record");
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.OdometerReading", b =>
+                {
+                    b.HasOne("Revivo.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany("OdometerReadings")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.Vehicle", b =>
                 {
                     b.HasOne("Revivo.Domain.Entities.CarModel", "CarModel")
@@ -668,6 +710,8 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("MaintenanceRecords");
 
                     b.Navigation("MaintenanceSchedules");
+
+                    b.Navigation("OdometerReadings");
                 });
 #pragma warning restore 612, 618
         }
