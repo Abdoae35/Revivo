@@ -388,6 +388,53 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.NotificationSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("MaintenanceAlertsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ReminderDayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("ReminderTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("WarrantyAlertsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("WeeklyReminderEnabled")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VehicleId");
+
+                    b.HasIndex("UserId", "VehicleId")
+                        .IsUnique();
+
+                    b.ToTable("NotificationSettings", t =>
+                        {
+                            t.HasCheckConstraint("CK_NotificationSettings_ReminderDayOfWeek", "[ReminderDayOfWeek] BETWEEN 0 AND 6");
+                        });
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.OdometerReading", b =>
                 {
                     b.Property<int>("Id")
@@ -656,6 +703,17 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("Record");
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.NotificationSettings", b =>
+                {
+                    b.HasOne("Revivo.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany("NotificationSettings")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.OdometerReading", b =>
                 {
                     b.HasOne("Revivo.Domain.Entities.Vehicle", "Vehicle")
@@ -710,6 +768,8 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("MaintenanceRecords");
 
                     b.Navigation("MaintenanceSchedules");
+
+                    b.Navigation("NotificationSettings");
 
                     b.Navigation("OdometerReadings");
                 });

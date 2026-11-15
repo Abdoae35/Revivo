@@ -2,9 +2,20 @@
 
 ## Current state
 
-Mileage tracking code and Postman requests are in place on `feature/mileage-notifications`. Migration `20261115132509_AddOdometerReadings` is generated but has not been applied because SQL Server refused the connection. The previous skill removal remains in effect.
+Notification settings and alert aggregation are implemented on `feature/notifications`. Migration `20261115135625_AddNotificationSettings` is applied to the configured SQL Server. EF reports the earlier odometer migration as applied as well. Firebase and push delivery are not implemented.
 
 ## Operations
+
+### 2026-11-15 — Implement notification settings and alerts
+
+- Added `NotificationSettings` domain rules, application contracts and alert selection, EF mapping, service, and migration `20261115135625_AddNotificationSettings`. A unique index enforces one row per user and vehicle; GET supplies defaults without inserting a row.
+- Added JWT-protected GET/PUT `/api/vehicles/{vehicleId}/notification-settings` and GET `/api/vehicles/{vehicleId}/alerts`. The alert service reuses periodic maintenance and warranty services and respects enabled preferences.
+- Added nine requests with response scripts under Notification Settings & Alerts in the existing `postman/Revivo.postman_collection.json`.
+- Added domain, EF mapping, endpoint, alert selection, and opt-in SQL integration tests. The SQL test writes a temporary vehicle and settings inside a transaction and rolls it back.
+- Verification: `dotnet restore Revivo.slnx` succeeded; `dotnet build Revivo.slnx --no-restore` succeeded with no warnings or errors; `REVIVO_SQL_INTEGRATION=1 dotnet test Revivo.Api.Tests/Revivo.Api.Tests.csproj --no-restore -m:1 -nr:false` passed 54/54 with no skips. EF applied the additive migration and listed all nine migrations as applied. `git diff --check` passed.
+- A draft integration test first failed to compile because this xUnit version lacks `Assert.Skip`; it was corrected. The sandboxed test runner was denied a local socket; the same test command passed with unrestricted execution.
+- Commit/push: pending at this checkpoint.
+- Remaining work: none for settings and alert retrieval. Push delivery awaits the separate Flutter/Firebase feature.
 
 ### 2026-11-15 — Implement mileage tracking
 
