@@ -2,9 +2,18 @@
 
 ## Current state
 
-Vehicle sharing and read-only shared access are implemented on `feature/vehicle-sharing`. Migration `20261115145958_AddVehicleShares` is applied to the configured SQL Server. Accepted shares grant current read access; writes and share management remain owner-only. Changes are uncommitted because Git writes to `.git/index.lock` are denied.
+The current checkout is `master`, tracking `origin/master`, with vehicle sharing included in commit `f72e91e`. The public README and Mermaid ERD document the implemented backend and the latest EF Core snapshot. The default suite passes 71/71. SQL integration tests remain opt-in and need a reachable configured SQL Server.
 
 ## Operations
+
+### 2026-11-15 — Document the completed backend and database schema
+
+- Audited the solution projects, entities, EF Core snapshot and migrations, API route mappings, authorization, tests, and the single Postman collection. The latest migration is `20261115145958_AddVehicleShares`; no migration or application code was changed.
+- Created root `README.md` with verified feature, architecture, API, setup, security, testing, Postman, and project-status sections. Its 39 documented routes match the 39 mapped routes.
+- Created `docs/DATABASE_ERD.md` and standalone `docs/erd.mmd` with 18 EF-mapped tables (11 application, 7 Identity) and 19 foreign-key relationships. The Markdown and standalone Mermaid diagrams are identical. The ERD distinguishes user GUID fields without database foreign keys from actual Identity references.
+- Refreshed this history and the bounded `AGENTS.md` handoff, replacing stale uncommitted feature-branch status.
+- Verification: `dotnet build Revivo.slnx --no-restore -m:1 -nr:false` succeeded with zero warnings and errors; `dotnet test Revivo.slnx --no-build --no-restore -m:1 -nr:false` passed 71/71. The standard restore stalled while resolving packages in the restricted environment; a local-cache restore was also attempted. SQL integration tests were not run in this documentation pass.
+- Git: the documentation work was performed on the checked-out `master` branch without switching or merging branches; commit and push status is recorded in the final report.
 
 ### 2026-11-15 — Implement vehicle sharing and access management
 

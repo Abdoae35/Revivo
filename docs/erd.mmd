@@ -1,0 +1,150 @@
+erDiagram
+    AspNetUsers {
+        guid Id PK
+        string Name
+        string UserName
+        string NormalizedUserName
+        string Email
+        string NormalizedEmail
+        string PasswordHash
+        bool EmailConfirmed
+    }
+    AspNetRoles {
+        guid Id PK
+        string Name
+        string NormalizedName
+    }
+    AspNetUserClaims {
+        int Id PK
+        guid UserId FK
+        string ClaimType
+        string ClaimValue
+    }
+    AspNetRoleClaims {
+        int Id PK
+        guid RoleId FK
+        string ClaimType
+        string ClaimValue
+    }
+    AspNetUserLogins {
+        string LoginProvider PK
+        string ProviderKey PK
+        guid UserId FK
+        string ProviderDisplayName
+    }
+    AspNetUserRoles {
+        guid UserId PK, FK
+        guid RoleId PK, FK
+    }
+    AspNetUserTokens {
+        guid UserId PK, FK
+        string LoginProvider PK
+        string Name PK
+        string Value
+    }
+    CarMakes {
+        int Id PK
+        string Name
+    }
+    CarModels {
+        int Id PK
+        int CarMakeId FK
+        string Name
+        int YearStart
+        int YearEnd
+    }
+    Vehicles {
+        int Id PK
+        int CarModelId FK
+        guid OwnerId
+        int Year
+        int CurrentMileageKm
+        string Nickname
+        string ImageUrl
+        datetimeoffset CreatedAt
+    }
+    MaintenanceCategories {
+        int Id PK
+        string Name
+    }
+    MaintenanceItems {
+        int Id PK
+        int MaintenanceCategoryId FK
+        string Name
+    }
+    MaintenanceRecords {
+        int Id PK
+        int VehicleId FK
+        int MaintenanceItemId FK
+        date MaintenanceDate
+        int MileageKm
+        decimal CostEgp
+        string Notes
+        datetimeoffset CreatedAt
+    }
+    MaintenanceSchedules {
+        int Id PK
+        int VehicleId FK
+        int MaintenanceItemId FK
+        int IntervalKm
+        int IntervalMonths
+        int WarningKm
+        int WarningDays
+    }
+    MaintenanceWarranties {
+        int MaintenanceRecordId PK, FK
+        int DurationMonths
+        date StartDate
+        int WarningDays
+        string Provider
+        string Brand
+        string Notes
+        datetimeoffset CreatedAt
+    }
+    OdometerReadings {
+        int Id PK
+        int VehicleId FK
+        int MileageKm
+        datetimeoffset RecordedAt
+        guid RecordedByUserId
+    }
+    NotificationSettings {
+        int Id PK
+        int VehicleId FK
+        guid UserId
+        bool WeeklyReminderEnabled
+        int ReminderDayOfWeek
+        time ReminderTime
+        string TimeZoneId
+        bool MaintenanceAlertsEnabled
+        bool WarrantyAlertsEnabled
+    }
+    VehicleShares {
+        int Id PK
+        int VehicleId FK
+        guid InvitedUserId FK
+        guid InvitedByUserId FK
+        string Status
+        datetimeoffset CreatedAt
+        datetimeoffset RespondedAt
+    }
+
+    AspNetUsers ||--o{ AspNetUserClaims : has
+    AspNetUsers ||--o{ AspNetUserLogins : has
+    AspNetUsers ||--o{ AspNetUserRoles : has
+    AspNetUsers ||--o{ AspNetUserTokens : has
+    AspNetRoles ||--o{ AspNetRoleClaims : has
+    AspNetRoles ||--o{ AspNetUserRoles : has
+    CarMakes ||--o{ CarModels : contains
+    CarModels ||--o{ Vehicles : classifies
+    MaintenanceCategories ||--o{ MaintenanceItems : contains
+    MaintenanceItems ||--o{ MaintenanceRecords : categorizes
+    Vehicles ||--o{ MaintenanceRecords : has
+    MaintenanceItems ||--o{ MaintenanceSchedules : configures
+    Vehicles ||--o{ MaintenanceSchedules : has
+    MaintenanceRecords ||--o| MaintenanceWarranties : may_have
+    Vehicles ||--o{ OdometerReadings : has
+    Vehicles ||--o{ NotificationSettings : has
+    Vehicles ||--o{ VehicleShares : shares
+    AspNetUsers ||--o{ VehicleShares : invites
+    AspNetUsers ||--o{ VehicleShares : receives

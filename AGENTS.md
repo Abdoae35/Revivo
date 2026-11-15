@@ -4,4 +4,4 @@ Maintain one project-wide Postman collection at `postman/Revivo.postman_collecti
 
 ## Current handoff
 
-Vehicle sharing and read-only shared access are implemented on `feature/vehicle-sharing`. Migration `20261115145958_AddVehicleShares` was applied to the configured SQL Server, and the SQL integration test uses a rolled-back fixture. The changes are uncommitted because Git cannot create `.git/index.lock` under current permissions; commit and push when Git writes are available. See [PROJECT_HISTORY.md](PROJECT_HISTORY.md) and [docs/VEHICLE_SHARING.md](docs/VEHICLE_SHARING.md).
+The current checkout is `master` at the vehicle-sharing implementation. The root [README.md](README.md) documents all 39 API routes and the [database ERD](docs/DATABASE_ERD.md) reflects the latest EF Core snapshot (18 tables). The default test suite passed 71/71 during the documentation audit; SQL integration tests require `REVIVO_SQL_INTEGRATION=1` and a reachable configured SQL Server. See [PROJECT_HISTORY.md](PROJECT_HISTORY.md) for verification and Git status.
