@@ -14,7 +14,7 @@ Notification settings and alert aggregation are implemented on `feature/notifica
 - Added domain, EF mapping, endpoint, alert selection, and opt-in SQL integration tests. The SQL test writes a temporary vehicle and settings inside a transaction and rolls it back.
 - Verification: `dotnet restore Revivo.slnx` succeeded; `dotnet build Revivo.slnx --no-restore` succeeded with no warnings or errors; `REVIVO_SQL_INTEGRATION=1 dotnet test Revivo.Api.Tests/Revivo.Api.Tests.csproj --no-restore -m:1 -nr:false` passed 54/54 with no skips. EF applied the additive migration and listed all nine migrations as applied. `git diff --check` passed.
 - A draft integration test first failed to compile because this xUnit version lacks `Assert.Skip`; it was corrected. The sandboxed test runner was denied a local socket; the same test command passed with unrestricted execution.
-- Commit/push: pending at this checkpoint.
+- Commit/push: implementation committed as `0ff666b` and pushed to `origin/feature/notifications`; this history status update is documented in a follow-up commit.
 - Remaining work: none for settings and alert retrieval. Push delivery awaits the separate Flutter/Firebase feature.
 
 ### 2026-11-15 — Implement mileage tracking
