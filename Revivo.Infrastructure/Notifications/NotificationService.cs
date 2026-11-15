@@ -4,6 +4,7 @@ using Revivo.Application.Notifications;
 using Revivo.Application.Warranties;
 using Revivo.Domain.Entities;
 using Revivo.Infrastructure.Persistence;
+using Revivo.Infrastructure.Vehicles;
 
 namespace Revivo.Infrastructure.Notifications;
 
@@ -13,7 +14,7 @@ public sealed class NotificationService(RevivoDbContext db, IPeriodicMaintenance
     public async Task<NotificationSettingsDto?> GetSettingsAsync(Guid userId, int vehicleId,
         CancellationToken cancellationToken)
     {
-        if (!await OwnsVehicleAsync(userId, vehicleId, cancellationToken)) return null;
+        if (!await VehicleAccess.CanReadAsync(db, userId, vehicleId, cancellationToken)) return null;
         var settings = await db.NotificationSettings.AsNoTracking().SingleOrDefaultAsync(
             item => item.UserId == userId && item.VehicleId == vehicleId, cancellationToken);
         return ToDto(settings ?? Defaults(userId, vehicleId));

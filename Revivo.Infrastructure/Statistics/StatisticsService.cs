@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Revivo.Application.Statistics;
 using Revivo.Domain.Statistics;
 using Revivo.Infrastructure.Persistence;
+using Revivo.Infrastructure.Vehicles;
 
 namespace Revivo.Infrastructure.Statistics;
 
@@ -47,8 +48,9 @@ public sealed class StatisticsService(RevivoDbContext db) : IStatisticsService
             await ExpensesAsync(vehicleId, cancellationToken));
     }
 
-    private Task<int?> OwnedMileageAsync(Guid userId, int vehicleId, CancellationToken cancellationToken) =>
-        db.Vehicles.AsNoTracking().Where(vehicle => vehicle.Id == vehicleId && vehicle.OwnerId == userId)
+    private async Task<int?> OwnedMileageAsync(Guid userId, int vehicleId, CancellationToken cancellationToken) =>
+        !await VehicleAccess.CanReadAsync(db, userId, vehicleId, cancellationToken) ? null :
+        await db.Vehicles.AsNoTracking().Where(vehicle => vehicle.Id == vehicleId)
             .Select(vehicle => (int?)vehicle.CurrentMileageKm).SingleOrDefaultAsync(cancellationToken);
 
     private Task<List<OdometerPoint>> ReadingsAsync(int vehicleId, CancellationToken cancellationToken) =>

@@ -3986,6 +3986,1280 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Vehicle Sharing & Access",
+      "description": "Set accessToken to the owner token, otherAccessToken to a registered invitee token, and inviteeEmail to that account email. Run invite, invitations, accept, shared reads, then revoke. Rejection requires a fresh pending invitation.",
+      "item": [
+        {
+          "name": "Invite Registered User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const s = pm.response.json();",
+                  "pm.test('Pending invitation created for owned vehicle', () => { pm.expect(s.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId'))); pm.expect(s.status).to.equal('Pending'); pm.expect(s.invitedUserEmail.toLowerCase()).to.equal(pm.collectionVariables.get('inviteeEmail').toLowerCase()); });",
+                  "pm.collectionVariables.set('shareId', String(s.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Owner token required. inviteeEmail must belong to another registered account.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{inviteeEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 example",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "vehicles",
+                    "{{vehicleId}}",
+                    "shares"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Owner token required. inviteeEmail must belong to another registered account.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{inviteeEmail}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 42,\n  \"vehicleId\": 12,\n  \"invitedUserId\": \"11111111-1111-4111-8111-111111111111\",\n  \"invitedUserEmail\": \"invitee@example.com\",\n  \"invitedByUserId\": \"22222222-2222-4222-8222-222222222222\",\n  \"status\": \"Pending\",\n  \"createdAt\": \"2026-11-15T10:00:00+00:00\",\n  \"respondedAt\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Received Invitations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Only pending invitations returned', () => { const rows = pm.response.json(); pm.expect(rows).to.be.an('array'); rows.forEach(s => pm.expect(s.status).to.equal('Pending')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicle-invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicle-invitations"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Uses the invited user token."
+          },
+          "response": [
+            {
+              "name": "200 example",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/vehicle-invitations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "vehicle-invitations"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{otherAccessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Uses the invited user token."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": 42,\n    \"vehicleId\": 12,\n    \"invitedUserId\": \"11111111-1111-4111-8111-111111111111\",\n    \"invitedUserEmail\": \"invitee@example.com\",\n    \"invitedByUserId\": \"22222222-2222-4222-8222-222222222222\",\n    \"status\": \"Pending\",\n    \"createdAt\": \"2026-11-15T10:00:00+00:00\",\n    \"respondedAt\": null\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Accept Invitation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Invitation accepted', () => { const s = pm.response.json(); pm.expect(s.id).to.equal(Number(pm.collectionVariables.get('shareId'))); pm.expect(s.status).to.equal('Accepted'); pm.expect(s.respondedAt).to.be.a('string'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicle-invitations/{{shareId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicle-invitations",
+                "{{shareId}}",
+                "accept"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Only the invited user may respond."
+          },
+          "response": [
+            {
+              "name": "200 example",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/vehicle-invitations/{{shareId}}/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "vehicle-invitations",
+                    "{{shareId}}",
+                    "accept"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{otherAccessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Only the invited user may respond."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 42,\n  \"vehicleId\": 12,\n  \"invitedUserId\": \"11111111-1111-4111-8111-111111111111\",\n  \"invitedUserEmail\": \"invitee@example.com\",\n  \"invitedByUserId\": \"22222222-2222-4222-8222-222222222222\",\n  \"status\": \"Accepted\",\n  \"createdAt\": \"2026-11-15T10:00:00+00:00\",\n  \"respondedAt\": \"2026-11-15T10:05:00+00:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Owned Vehicle Shares",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Shares belong to owned vehicle', () => { const rows = pm.response.json(); pm.expect(rows).to.be.an('array'); rows.forEach(s => pm.expect(s.vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId')))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Owner only. Includes pending and accepted shares."
+          },
+          "response": [
+            {
+              "name": "200 example",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "vehicles",
+                    "{{vehicleId}}",
+                    "shares"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Owner only. Includes pending and accepted shares."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": 42,\n    \"vehicleId\": 12,\n    \"invitedUserId\": \"11111111-1111-4111-8111-111111111111\",\n    \"invitedUserEmail\": \"invitee@example.com\",\n    \"invitedByUserId\": \"22222222-2222-4222-8222-222222222222\",\n    \"status\": \"Accepted\",\n    \"createdAt\": \"2026-11-15T10:00:00+00:00\",\n    \"respondedAt\": \"2026-11-15T10:05:00+00:00\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Shared Vehicles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Only accepted vehicles appear', () => { const rows = pm.response.json(); pm.expect(rows).to.be.an('array'); rows.forEach(v => pm.expect(v.id).to.be.a('number')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/shared",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "shared"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Uses the invited user token. A pending or rejected invitation yields an empty list."
+          },
+          "response": [
+            {
+              "name": "200 example",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/vehicles/shared",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "vehicles",
+                    "shared"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{otherAccessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Uses the invited user token. A pending or rejected invitation yields an empty list."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": 12,\n    \"ownerId\": \"22222222-2222-4222-8222-222222222222\",\n    \"carModelId\": 3,\n    \"year\": 2024,\n    \"currentMileageKm\": 24000,\n    \"nickname\": \"Family car\",\n    \"imageUrl\": null,\n    \"createdAt\": \"2026-01-01T00:00:00+00:00\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Read Shared Vehicle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Shared vehicle ID matches', () => pm.expect(pm.response.json().id).to.equal(Number(pm.collectionVariables.get('vehicleId'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Requires an accepted share."
+          },
+          "response": []
+        },
+        {
+          "name": "Read Shared Maintenance History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Maintenance history is paginated', () => { const page = pm.response.json(); pm.expect(page.items).to.be.an('array'); pm.expect(page.page).to.equal(1); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Requires an accepted share."
+          },
+          "response": []
+        },
+        {
+          "name": "Read Shared Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Statistics belong to shared vehicle', () => pm.expect(pm.response.json().vehicleId).to.equal(Number(pm.collectionVariables.get('vehicleId'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/statistics/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "statistics",
+                "overview"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Requires an accepted share."
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate Active Invitation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Run after inviting or accepting the same user.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{inviteeEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Non-owner Invite",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Uses the invited user token for a vehicle owned by accessToken.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{inviteeEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Invite Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Email validation returned', () => pm.expect(pm.response.json().errors).to.have.property('email'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"not-an-email\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unregistered Invitee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Registered email required', () => pm.expect(pm.response.json().errors).to.have.property('email'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"missing-user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Self Invite",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Self invitation rejected', () => pm.expect(pm.response.json().errors).to.have.property('email'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Set ownerEmail to the email address of accessToken.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Shared User Cannot Add Maintenance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/maintenance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "maintenance"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Run after accepting the invitation. Shared users cannot write maintenance records.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Fluids\",\n  \"itemName\": \"Oil\",\n  \"maintenanceDate\": \"2024-01-01\",\n  \"mileageKm\": 1000,\n  \"costEgp\": 100.25,\n  \"notes\": \"Read-only share test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Revoke Access",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares/{{shareId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares",
+                "{{shareId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Run after accepting. Shared GET requests should then return 404."
+          },
+          "response": []
+        },
+        {
+          "name": "Revoked User Cannot Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Run after Revoke Access."
+          },
+          "response": []
+        },
+        {
+          "name": "Reinvite After Revocation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "const s = pm.response.json();",
+                  "pm.test('New pending invitation created', () => pm.expect(s.status).to.equal('Pending'));",
+                  "pm.collectionVariables.set('shareId', String(s.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}",
+                "shares"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Run after Revoke Access.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{inviteeEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 example",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}/shares",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "vehicles",
+                    "{{vehicleId}}",
+                    "shares"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Run after Revoke Access.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{inviteeEmail}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 42,\n  \"vehicleId\": 12,\n  \"invitedUserId\": \"11111111-1111-4111-8111-111111111111\",\n  \"invitedUserEmail\": \"invitee@example.com\",\n  \"invitedByUserId\": \"22222222-2222-4222-8222-222222222222\",\n  \"status\": \"Pending\",\n  \"createdAt\": \"2026-11-15T10:00:00+00:00\",\n  \"respondedAt\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject Invitation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Invitation rejected', () => pm.expect(pm.response.json().status).to.equal('Rejected'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicle-invitations/{{shareId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicle-invitations",
+                "{{shareId}}",
+                "reject"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Run after Reinvite After Revocation."
+          },
+          "response": [
+            {
+              "name": "200 example",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/vehicle-invitations/{{shareId}}/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "vehicle-invitations",
+                    "{{shareId}}",
+                    "reject"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{otherAccessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Run after Reinvite After Revocation."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 42,\n  \"vehicleId\": 12,\n  \"invitedUserId\": \"11111111-1111-4111-8111-111111111111\",\n  \"invitedUserEmail\": \"invitee@example.com\",\n  \"invitedByUserId\": \"22222222-2222-4222-8222-222222222222\",\n  \"status\": \"Rejected\",\n  \"createdAt\": \"2026-11-15T10:00:00+00:00\",\n  \"respondedAt\": \"2026-11-15T10:05:00+00:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Rejected User Cannot Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicles/{{vehicleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicles",
+                "{{vehicleId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{otherAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Run after Reject Invitation."
+          },
+          "response": []
+        },
+        {
+          "name": "Unauthorized Invitations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vehicle-invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vehicle-invitations"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -4028,6 +5302,18 @@
     {
       "key": "warrantyCreatedAt",
       "value": ""
+    },
+    {
+      "key": "shareId",
+      "value": ""
+    },
+    {
+      "key": "inviteeEmail",
+      "value": "invitee@example.com"
+    },
+    {
+      "key": "ownerEmail",
+      "value": "owner@example.com"
     }
   ]
 }

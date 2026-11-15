@@ -511,6 +511,47 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.VehicleShare", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("InvitedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InvitedUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("RespondedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvitedByUserId");
+
+                    b.HasIndex("InvitedUserId", "Status");
+
+                    b.HasIndex("VehicleId", "InvitedUserId")
+                        .IsUnique()
+                        .HasFilter("[Status] IN (N'Pending', N'Accepted')");
+
+                    b.ToTable("VehicleShares");
+                });
+
             modelBuilder.Entity("Revivo.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -736,6 +777,29 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("CarModel");
                 });
 
+            modelBuilder.Entity("Revivo.Domain.Entities.VehicleShare", b =>
+                {
+                    b.HasOne("Revivo.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Revivo.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("InvitedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Revivo.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany("Shares")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("Revivo.Domain.Entities.CarMake", b =>
                 {
                     b.Navigation("Models");
@@ -772,6 +836,8 @@ namespace Revivo.Infrastructure.Persistence.Migrations
                     b.Navigation("NotificationSettings");
 
                     b.Navigation("OdometerReadings");
+
+                    b.Navigation("Shares");
                 });
 #pragma warning restore 612, 618
         }

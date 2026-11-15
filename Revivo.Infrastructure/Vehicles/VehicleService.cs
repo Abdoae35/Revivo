@@ -29,7 +29,8 @@ public sealed class VehicleService(RevivoDbContext db) : IVehicleService
             .ToListAsync(cancellationToken);
 
     public async Task<VehicleDto?> GetAsync(Guid ownerId, int id, CancellationToken cancellationToken) =>
-        await db.Vehicles.AsNoTracking().Where(vehicle => vehicle.OwnerId == ownerId && vehicle.Id == id)
+        !await VehicleAccess.CanReadAsync(db, ownerId, id, cancellationToken) ? null :
+        await db.Vehicles.AsNoTracking().Where(vehicle => vehicle.Id == id)
             .Select(vehicle => new VehicleDto(vehicle.Id, vehicle.OwnerId, vehicle.CarModelId, vehicle.Year,
                 vehicle.CurrentMileageKm, vehicle.Nickname, vehicle.ImageUrl, vehicle.CreatedAt))
             .SingleOrDefaultAsync(cancellationToken);

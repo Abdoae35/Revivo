@@ -2,9 +2,20 @@
 
 ## Current state
 
-Statistics and expense analytics are implemented on `feature/statistics-expenses` using existing odometer, vehicle, and maintenance tables. No schema change or migration was required. The prior notification and mileage migrations are applied in the configured SQL Server.
+Vehicle sharing and read-only shared access are implemented on `feature/vehicle-sharing`. Migration `20261115145958_AddVehicleShares` is applied to the configured SQL Server. Accepted shares grant current read access; writes and share management remain owner-only. Changes are uncommitted because Git writes to `.git/index.lock` are denied.
 
 ## Operations
+
+### 2026-11-15 — Implement vehicle sharing and access management
+
+- Added `VehicleShare` with Pending, Accepted, and Rejected states; EF configuration and additive migration `20261115145958_AddVehicleShares` add vehicle/user foreign keys and a filtered unique index preventing duplicate pending or accepted shares.
+- Added owner invitation, share listing and revocation; invited-user inbox, accept and reject; and accepted shared-vehicle listing. Email is used to find a registered user, with no email delivery. User identity for authorization comes from JWT claims.
+- Centralized accepted-share read checks in `VehicleAccess` and applied them to vehicle detail, maintenance history, periodic status, warranty reads, odometer history, alerts, and statistics. Existing writes remain owner-only. Added workflow and permission documentation in `docs/VEHICLE_SHARING.md`.
+- Updated the existing Postman collection with 20 sharing workflow and denial requests, validation scripts, and sample responses. No real credentials were added.
+- Verification: restored all projects from the local NuGet cache after the default sandboxed restore stalled; `dotnet build Revivo.slnx --no-restore -m:1 -nr:false` succeeded with no warnings/errors; default tests passed 71/71; SQL-enabled tests passed 71/71 using `dotnet test ... -e REVIVO_SQL_INTEGRATION=1`. EF applied the migration. The SQL fixture rolled back its user, vehicle, maintenance, and share records.
+- The first SQL-enabled test exposed an EF translation error in invitation sorting; sorting was moved before DTO projection and the full SQL-enabled suite passed on rerun. The environment-prefixed test command was denied a local socket by the sandbox; the supported `dotnet test -e` option ran successfully.
+- Commit/push: `git add` succeeded, but `git commit -m "Add vehicle share model and persistence service"` failed with `Unable to create '/Users/macbookpro/Revivo/.git/index.lock': Operation not permitted`. The session approval policy does not allow escalation. No commit was created or pushed.
+- Remaining work: commit and push the feature on `feature/vehicle-sharing` once Git index writes are available.
 
 ### 2026-11-15 — Implement statistics and expenses
 

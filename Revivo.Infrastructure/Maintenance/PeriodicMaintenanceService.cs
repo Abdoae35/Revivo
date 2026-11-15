@@ -3,6 +3,7 @@ using Revivo.Application.Maintenance;
 using Revivo.Domain.Entities;
 using Revivo.Domain.Maintenance;
 using Revivo.Infrastructure.Persistence;
+using Revivo.Infrastructure.Vehicles;
 
 namespace Revivo.Infrastructure.Maintenance;
 
@@ -36,8 +37,9 @@ public sealed class PeriodicMaintenanceService(RevivoDbContext db) : IPeriodicMa
     public async Task<IReadOnlyList<MaintenanceStatusDto>?> GetStatusesAsync(Guid ownerId, int vehicleId,
         CancellationToken cancellationToken)
     {
+        if (!await VehicleAccess.CanReadAsync(db, ownerId, vehicleId, cancellationToken)) return null;
         var mileage = await db.Vehicles.AsNoTracking()
-            .Where(vehicle => vehicle.Id == vehicleId && vehicle.OwnerId == ownerId)
+            .Where(vehicle => vehicle.Id == vehicleId)
             .Select(vehicle => (int?)vehicle.CurrentMileageKm).SingleOrDefaultAsync(cancellationToken);
         if (mileage is null) return null;
 

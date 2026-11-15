@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Revivo.Application.Maintenance;
 using Revivo.Domain.Entities;
 using Revivo.Infrastructure.Persistence;
+using Revivo.Infrastructure.Vehicles;
 
 namespace Revivo.Infrastructure.Maintenance;
 
@@ -29,7 +30,7 @@ public sealed class MaintenanceService(RevivoDbContext db) : IMaintenanceService
     public async Task<MaintenancePage?> GetPageAsync(Guid ownerId, int vehicleId, int page, int pageSize,
         CancellationToken cancellationToken)
     {
-        if (!await db.Vehicles.AnyAsync(vehicle => vehicle.Id == vehicleId && vehicle.OwnerId == ownerId, cancellationToken))
+        if (!await VehicleAccess.CanReadAsync(db, ownerId, vehicleId, cancellationToken))
             return null;
         var query = db.MaintenanceRecords.AsNoTracking().Where(record => record.VehicleId == vehicleId);
         var total = await query.CountAsync(cancellationToken);
@@ -43,8 +44,9 @@ public sealed class MaintenanceService(RevivoDbContext db) : IMaintenanceService
     }
 
     public async Task<MaintenanceDto?> GetAsync(Guid ownerId, int vehicleId, int id, CancellationToken cancellationToken) =>
+        !await VehicleAccess.CanReadAsync(db, ownerId, vehicleId, cancellationToken) ? null :
         await db.MaintenanceRecords.AsNoTracking()
-            .Where(record => record.Id == id && record.VehicleId == vehicleId && record.Vehicle.OwnerId == ownerId)
+            .Where(record => record.Id == id && record.VehicleId == vehicleId)
             .Select(record => new MaintenanceDto(record.Id, record.VehicleId, record.MaintenanceItemId, record.Item.Category.Name,
                 record.Item.Name, record.MaintenanceDate, record.MileageKm, record.CostEgp,
                 record.Notes, record.CreatedAt)).SingleOrDefaultAsync(cancellationToken);

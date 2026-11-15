@@ -37,8 +37,7 @@ public sealed class OdometerService(RevivoDbContext db) : IOdometerService
     public async Task<OdometerHistoryDto?> GetHistoryAsync(Guid ownerId, int vehicleId, int page, int pageSize,
         CancellationToken cancellationToken)
     {
-        if (!await db.Vehicles.AnyAsync(vehicle => vehicle.Id == vehicleId && vehicle.OwnerId == ownerId,
-                cancellationToken)) return null;
+        if (!await VehicleAccess.CanReadAsync(db, ownerId, vehicleId, cancellationToken)) return null;
         var readings = db.OdometerReadings.AsNoTracking().Where(reading => reading.VehicleId == vehicleId);
         var total = await readings.CountAsync(cancellationToken);
         var items = await readings.OrderByDescending(reading => reading.RecordedAt)

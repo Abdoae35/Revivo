@@ -13,6 +13,7 @@ public sealed class Vehicle
     public ICollection<MaintenanceSchedule> MaintenanceSchedules { get; set; } = new List<MaintenanceSchedule>();
     public ICollection<OdometerReading> OdometerReadings { get; set; } = new List<OdometerReading>();
     public ICollection<NotificationSettings> NotificationSettings { get; set; } = new List<NotificationSettings>();
+    public ICollection<VehicleShare> Shares { get; set; } = new List<VehicleShare>();
 
     public required int Year
     {

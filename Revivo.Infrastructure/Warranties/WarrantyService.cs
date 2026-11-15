@@ -3,6 +3,7 @@ using Revivo.Application.Warranties;
 using Revivo.Domain.Entities;
 using Revivo.Domain.Warranties;
 using Revivo.Infrastructure.Persistence;
+using Revivo.Infrastructure.Vehicles;
 
 namespace Revivo.Infrastructure.Warranties;
 
@@ -46,11 +47,9 @@ public sealed class WarrantyService(RevivoDbContext db) : IWarrantyService
     public async Task<IReadOnlyList<WarrantyDto>?> GetAllAsync(Guid ownerId, int vehicleId,
         CancellationToken cancellationToken)
     {
-        if (!await db.Vehicles.AnyAsync(vehicle => vehicle.Id == vehicleId && vehicle.OwnerId == ownerId,
-                cancellationToken)) return null;
+        if (!await VehicleAccess.CanReadAsync(db, ownerId, vehicleId, cancellationToken)) return null;
         var warranties = await db.MaintenanceWarranties.AsNoTracking()
-            .Where(warranty => warranty.Record.VehicleId == vehicleId &&
-                warranty.Record.Vehicle.OwnerId == ownerId)
+            .Where(warranty => warranty.Record.VehicleId == vehicleId)
             .Include(warranty => warranty.Record).ThenInclude(record => record.Item)
             .ToListAsync(cancellationToken);
         return warranties.Select(warranty => ToDto(warranty, warranty.Record))
@@ -60,9 +59,9 @@ public sealed class WarrantyService(RevivoDbContext db) : IWarrantyService
     public async Task<WarrantyDto?> GetAsync(Guid ownerId, int vehicleId, int recordId,
         CancellationToken cancellationToken)
     {
+        if (!await VehicleAccess.CanReadAsync(db, ownerId, vehicleId, cancellationToken)) return null;
         var warranty = await db.MaintenanceWarranties.AsNoTracking()
-            .Where(entry => entry.MaintenanceRecordId == recordId && entry.Record.VehicleId == vehicleId &&
-                entry.Record.Vehicle.OwnerId == ownerId)
+            .Where(entry => entry.MaintenanceRecordId == recordId && entry.Record.VehicleId == vehicleId)
             .Include(entry => entry.Record).ThenInclude(record => record.Item)
             .SingleOrDefaultAsync(cancellationToken);
         return warranty is null ? null : ToDto(warranty, warranty.Record);

@@ -58,6 +58,7 @@ app.MapLoginEndpoints();
 app.MapCurrentUserEndpoints();
 app.MapCarCatalogEndpoints();
 app.MapVehicleEndpoints();
+app.MapVehicleShareEndpoints();
 app.MapOdometerEndpoints();
 app.MapMaintenanceEndpoints();
 app.MapPeriodicMaintenanceEndpoints();
