@@ -4,4 +4,4 @@ Maintain one project-wide Postman collection at `postman/Revivo.postman_collecti
 
 ## Current handoff
 
-The current checkout is `master` at the vehicle-sharing implementation. The root [README.md](README.md) documents all 39 API routes and the [database ERD](docs/DATABASE_ERD.md) reflects the latest EF Core snapshot (18 tables). The default test suite passed 71/71 during the documentation audit; SQL integration tests require `REVIVO_SQL_INTEGRATION=1` and a reachable configured SQL Server. See [PROJECT_HISTORY.md](PROJECT_HISTORY.md) for verification and Git status.
+The new Revivo Figma design now contains eight pages, 51 feature-screen designs, an Arabic specimen, a reusable design system, and 43 prototype frames. Page 08 contains the connected scripted journey (88 verified main links). See [docs/MOBILE_DESIGN_HANDOFF.md](docs/MOBILE_DESIGN_HANDOFF.md) for design/prototype links, API mapping, review evidence, and limitations. Backend functionality is unchanged; native Flutter implementation and user testing remain separate work.

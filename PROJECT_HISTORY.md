@@ -2,9 +2,28 @@
 
 ## Current state
 
+The mobile Figma design has been built after canvas access became available. It includes eight pages, 51 feature-screen designs, an Arabic specimen, a reusable design system, and 43 prototype frames with 88 verified main journey links. `docs/MOBILE_DESIGN_HANDOFF.md` contains links, API mapping, quality checks, and implementation limitations. Backend functionality is unchanged.
+
 The current checkout is `master`, tracking `origin/master`, with vehicle sharing included in commit `f72e91e`. The public README and Mermaid ERD document the implemented backend and the latest EF Core snapshot. The default suite passes 71/71. SQL integration tests remain opt-in and need a reachable configured SQL Server.
 
 ## Operations
+
+### 2026-11-16 — Build the editable Revivo mobile design and prototype
+
+- Resumed the same new Figma file after the earlier tool restriction was resolved. Built all eight requested pages without reading or changing the older design.
+- Created light/dark variable foundations, six typography styles, an elevation style, 27 main components, four variant sets, editable mobile screens, loading/error/empty states, an Arabic specimen, and a dedicated prototype canvas. Generated one illustrative Corolla image using Figma AI credits and labeled it in the design.
+- Connected the registration, Corolla onboarding, oil-change recording, 10,000 km interval, odometer update, spending, warranty, and sharing workflows. Verified 88 main links and 193 interactive nodes from saved reactions. Shared history and spending have separate read-only destinations.
+- Reviewed representative rendered screens and audited all pages for editable layers, fonts, and image use. Corrected content-height clipping and sample expense/date inconsistencies. Checked six key color pairs, all above 4.5:1 contrast.
+- A rejected self-navigation reaction rolled back its script; links were reapplied and verified. The overlay-position setter is read-only, so the supported mileage overlay is centered. Prototype input and data remain scripted; user testing, full accessibility validation, and Arabic localization review have not been performed.
+- Updated `docs/MOBILE_DESIGN_HANDOFF.md`, `AGENTS.md`, and this history. No application changes, build, tests, commit, or push were performed for the design-only task.
+
+### 2026-11-16 — Audit mobile UX requirements and create new Figma file
+
+- Inspected current routes, DTOs, authentication, maintenance/warranty/mileage calculators, sharing checks, notification service, and Postman feature folders.
+- Created `Revivo — Mobile App | Complete UI/UX` at https://www.figma.com/design/YpH0vEGvFiVez3qJrFoZIh and opened a Figma work session. Did not inspect or modify the older design.
+- Library discovery completed. The first read-only `use_figma` call failed with `MCP tool call requires approval, but approval policy is never`; no canvas content, design system, or prototype was created. Resume in the same file when the tool is permitted.
+- Added `docs/MOBILE_DESIGN_HANDOFF.md` with screen/API mapping, proposed navigation, save behavior, backend gaps, and explicit incomplete-delivery status; refreshed `AGENTS.md` and this history. No application code changed.
+- No build or tests run for this design investigation. No commit or push requested or performed. Remaining work is the actual editable design, prototype, and visual/accessibility validation.
 
 ### 2026-11-15 — Document the completed backend and database schema
 
